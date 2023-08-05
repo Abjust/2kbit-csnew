@@ -9,28 +9,33 @@
 // 您应该已经收到了一份GNU Affero通用公共许可证的副本。 如果没有，请参见<https://www.gnu.org/licenses/>。
 
 /**
- * 2kbit C# Edition: New
- * 保留模块（功能未实现）
+* 2kbit C# Edition: New
+* 定时任务计划模块
 **/
 
-using Mirai.Net.Sessions.Http.Managers;
-using Net_Codeintp_cs.Modules.Utils;
+using Mirai.Net.Data.Messages;
+using Mirai.Net.Data.Messages.Receivers;
+using Mirai.Net.Modules;
+using Mirai.Net.Utils.Scaffolds;
 
-namespace Net_Codeintp_cs.Modules
+namespace Net_Codeintp_cs.Modules.Group.Commands
 {
-    internal class NotImplemented
+    internal class Scheduler : IModule
     {
-        public static async void Do(string group, string command)
+        public bool? IsEnable { get; set; }
+
+        public void Execute(MessageReceiverBase @base)
         {
-            Logger.Warning($"指令“{command}”尚未实现，无法执行！");
-            try
+            var receiver = @base.Concretize<GroupMessageReceiver>();
+            string[] s = receiver.MessageChain.GetPlainMessage().Split(" ");
+            switch (s[0])
             {
-                await MessageManager.SendGroupMessageAsync(group, $"指令“{command}”的功能已在计划内，但是尚未实现！");
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("群消息发送失败！");
-                Logger.Debug($"\n{ex.Message}");
+                case "!add_schedule":
+                    NotImplemented.Do(receiver.GroupId, s[0]);
+                    break;
+                case "!delete_schedule":
+                    NotImplemented.Do(receiver.GroupId, s[0]);
+                    break;
             }
         }
     }

@@ -10,38 +10,45 @@
 
 /**
  * 2kbit C# Edition: New
- * 私聊消息转发模块
+ * 帮助文档模块
 **/
 
 using Mirai.Net.Data.Messages;
-using Mirai.Net.Data.Messages.Concretes;
 using Mirai.Net.Data.Messages.Receivers;
 using Mirai.Net.Modules;
-using Mirai.Net.Sessions.Http.Managers;
 using Mirai.Net.Utils.Scaffolds;
 using Net_Codeintp_cs.Modules.Utils;
 
-namespace Net_Codeintp_cs.Modules.Friend
+namespace Net_Codeintp_cs.Modules.Group.Commands
 {
-    internal class ForwardMessage : IModule
+    internal class Help : IModule
     {
         public bool? IsEnable { get; set; }
 
         public async void Execute(MessageReceiverBase @base)
         {
-            var receiver = @base.Concretize<FriendMessageReceiver>();
-            if (receiver.FriendId != BotMain.OwnerQQ)
+            var receiver = @base.Concretize<GroupMessageReceiver>();
+            if (receiver.MessageChain.GetPlainMessage() == "菜单" || receiver.MessageChain.GetPlainMessage() == "!menu")
             {
-                Logger.Info($"接收到私聊消息！\n消息来自：{receiver.FriendName} ({receiver.FriendId})\n消息内容：\n{receiver.MessageChain.MiraiCode}");
-                SendMessage.LastMessageFrom = receiver.FriendId;
                 try
                 {
-                    MessageBase test = new MiraiCodeMessage($"消息来自：{receiver.FriendName} ({receiver.FriendId})\n消息内容：\n{receiver.MessageChain.MiraiCode}\n（你可以使用!send <目标QQ> <消息>来发送私聊消息）");
-                    await MessageManager.SendFriendMessageAsync(BotMain.OwnerQQ, test);
+                    await receiver.SendMessageAsync("请前往 https://2kbit.otherworld.icu 查看 2kbit C# Edition: New 使用教程！");
                 }
                 catch (Exception e)
                 {
-                    Logger.Error("私聊消息未能转发给机器人主人！（可能机器人主人不是机器人账号的好友）");
+                    Logger.Error("群消息发送失败！");
+                    Logger.Debug($"错误信息：\n{e.Message}");
+                }
+            }
+            else if (receiver.MessageChain.GetPlainMessage().StartsWith("!help"))
+            {
+                try
+                {
+                    await receiver.SendMessageAsync("请前往 https://2kbit.otherworld.icu 查看 2kbit C# Edition: New 使用教程！");
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("群消息发送失败！");
                     Logger.Debug($"错误信息：\n{e.Message}");
                 }
             }

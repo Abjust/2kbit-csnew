@@ -10,27 +10,35 @@
 
 /**
  * 2kbit C# Edition: New
- * 保留模块（功能未实现）
+ * 测试模块
 **/
 
-using Mirai.Net.Sessions.Http.Managers;
-using Net_Codeintp_cs.Modules.Utils;
+using Mirai.Net.Data.Messages;
+using Mirai.Net.Data.Messages.Receivers;
+using Mirai.Net.Modules;
+using Mirai.Net.Utils.Scaffolds;
 
-namespace Net_Codeintp_cs.Modules
+namespace Net_Codeintp_cs.Modules.Group.Commands
 {
-    internal class NotImplemented
+    public class HelloWorld : IModule
     {
-        public static async void Do(string group, string command)
+        public bool? IsEnable { get; set; }
+
+        public async void Execute(MessageReceiverBase @base)
         {
-            Logger.Warning($"指令“{command}”尚未实现，无法执行！");
-            try
+            var receiver = @base.Concretize<GroupMessageReceiver>();
+            switch (receiver.MessageChain.GetPlainMessage())
             {
-                await MessageManager.SendGroupMessageAsync(group, $"指令“{command}”的功能已在计划内，但是尚未实现！");
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("群消息发送失败！");
-                Logger.Debug($"\n{ex.Message}");
+                case "!test":
+                    try
+                    {
+                        await receiver.SendMessageAsync("Hello World!");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"出现错误！错误信息：{ex}");
+                    }
+                    break;
             }
         }
     }
