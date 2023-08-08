@@ -29,14 +29,14 @@ namespace Net_Codeintp_cs.Modules.Friend
 
         public async void Execute(MessageReceiverBase @base)
         {
-            var receiver = @base.Concretize<FriendMessageReceiver>();
+            FriendMessageReceiver receiver = @base.Concretize<FriendMessageReceiver>();
             if (receiver.FriendId != BotMain.OwnerQQ)
             {
                 Logger.Info($"接收到私聊消息！\n消息来自：{receiver.FriendName} ({receiver.FriendId})\n消息内容：\n{receiver.MessageChain.MiraiCode}");
                 SendMessage.LastMessageFrom = receiver.FriendId;
                 try
                 {
-                    MessageBase test = new MiraiCodeMessage($"消息来自：{receiver.FriendName} ({receiver.FriendId})\n消息内容：\n{receiver.MessageChain.MiraiCode}\n（你可以使用!send <目标QQ> <消息>来发送私聊消息）");
+                    MessageBase test = new MiraiCodeMessage($"消息来自：{receiver.FriendName} ({receiver.FriendId})\n消息内容：\n{receiver.MessageChain.MiraiCode}\n（你可以使用!send <目标QQ>来发送私聊消息，或者使用!reply回复这条消息）");
                     await MessageManager.SendFriendMessageAsync(BotMain.OwnerQQ, test);
                 }
                 catch (Exception e)

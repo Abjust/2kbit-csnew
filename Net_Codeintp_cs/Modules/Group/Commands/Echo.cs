@@ -28,7 +28,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
 
         async void IModule.Execute(MessageReceiverBase @base)
         {
-            var receiver = @base.Concretize<GroupMessageReceiver>();
+            GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
             if (receiver.MessageChain.GetPlainMessage().StartsWith("!echo") && receiver.MessageChain.Count >= 2)
             {
                 try
@@ -48,16 +48,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
                     }
                     else
                     {
-                        Logger.Info($"未尝试复述文本，因为这条请求有递归执行的嫌疑！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                        try
-                        {
-                            await receiver.SendMessageAsync("请不要妄图递归执行echo指令！");
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.Error("群消息发送失败！");
-                            Logger.Debug($"\n错误信息：\n{e.Message}");
-                        }
+                        Logger.Warning($"未尝试复述文本，因为这条请求有递归执行的嫌疑！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
                     }
                 }
                 catch (Exception e)

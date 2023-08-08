@@ -29,7 +29,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
 
         public async void Execute(MessageReceiverBase @base)
         {
-            var receiver = @base.Concretize<GroupMessageReceiver>();
+            GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
             string[] s = receiver.MessageChain.MiraiCode.TrimEnd().Split(" ");
             string person;
             if (s[0] == "!call" && (last_call == null || DateTimeOffset.UtcNow.ToUnixTimeSeconds() - last_call >= call_cd))

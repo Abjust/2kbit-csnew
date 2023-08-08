@@ -27,7 +27,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
 
         public async void Execute(MessageReceiverBase @base)
         {
-            var receiver = @base.Concretize<GroupMessageReceiver>();
+            GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
             List<string> words = new()
                         {
                             "我想自杀",
@@ -49,12 +49,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
 
             foreach (string word in words)
             {
-                // (IEnumerable<string>, IEnumerable<string>) list = Similarity.Divide(word, receiver.MessageChain.GetPlainMessage().ToLower());
-                // List<string> all_words = Similarity.GetAllWords(list.Item1, list.Item2);
-                // (List<int>, List<int>) lst1 = Similarity.GetWordVector(list.Item1, list.Item2, all_words);
-                // double cos = Similarity.CalculateCosine(lst1.Item1, lst1.Item2);
-
-                if (receiver.MessageChain.GetPlainMessage().ToLower() == "djafhljsdhkjflhasdkjlfhkjsadhfk")
+                if (receiver.MessageChain.GetPlainMessage().ToLower().Contains(word))
                 {
                     List<string> poems = new()
                                 {

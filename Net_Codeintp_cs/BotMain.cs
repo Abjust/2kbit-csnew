@@ -18,10 +18,14 @@ using Mirai.Net.Data.Events.Concretes.Message;
 using Mirai.Net.Data.Events.Concretes.Request;
 using Mirai.Net.Data.Messages;
 using Mirai.Net.Data.Shared;
+using Mirai.Net.Modules;
 using Mirai.Net.Sessions;
 using Mirai.Net.Sessions.Http.Managers;
 using Mirai.Net.Utils.Scaffolds;
+using Net_Codeintp_cs.Modules.Group.Tasks;
 using Net_Codeintp_cs.Modules.Utils;
+using Quartz;
+using System.Collections.Specialized;
 using System.Reactive.Linq;
 using System.Reflection;
 
@@ -97,6 +101,8 @@ namespace Net_Codeintp_cs
             {
                 Directory.CreateDirectory("data");
             }
+            // 初始化权限
+            Modules.Group.Commands.Admin.Update.Do();
             // 初始化bot
             MiraiBot bot = new();
             try
@@ -205,7 +211,7 @@ namespace Net_Codeintp_cs
             {
                 if (Permission.IsBlocked(e.GroupId, e.FromId))
                 {
-                    await e.RejectAsync();
+                    await e.RejectAsync("2kbit 已将此人识别为黑名单成员，禁止进入");
                 }
             });
             // 侦测改名
@@ -319,20 +325,22 @@ namespace Net_Codeintp_cs
                 }
             });
             // 加载私聊消息模块
-            var friend_modules = new Modules.Friend.LoadModules().GetModules();
-            foreach (var module in friend_modules)
+            List<IModule> friend_modules = new Modules.Friend.LoadModules().GetModules();
+            foreach (IModule module in friend_modules)
             {
                 module.IsEnable = true;
+                Logger.Debug($"私聊消息模块 {module} 已加载！");
             }
             bot.MessageReceived.SubscribeFriendMessage(friend =>
             {
                 friend_modules.Raise(friend);
             });
             // 加载群消息模块
-            var group_modules = new Modules.Group.LoadModules().GetModules();
-            foreach (var module in group_modules)
+            List<IModule> group_modules = new Modules.Group.LoadModules().GetModules();
+            foreach (IModule module in group_modules)
             {
                 module.IsEnable = true;
+                Logger.Debug($"群消息模块 {module} 已加载！");
             }
             bot.MessageReceived.SubscribeGroupMessage(group =>
             {
@@ -342,8 +350,9 @@ namespace Net_Codeintp_cs
                     group_modules.Raise(group);
                 }
             });
+            await Schedules.Initialize();
             // 阻塞主线程
-            var signal = new ManualResetEvent(false);
+            ManualResetEvent signal = new(false);
             signal.WaitOne();
         }
     }

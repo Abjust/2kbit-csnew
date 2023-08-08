@@ -14,7 +14,6 @@
 **/
 
 using Mirai.Net.Data.Messages;
-using Mirai.Net.Data.Messages.Concretes;
 using Mirai.Net.Data.Messages.Receivers;
 using Mirai.Net.Modules;
 using Mirai.Net.Sessions.Http.Managers;
@@ -27,20 +26,29 @@ namespace Net_Codeintp_cs.Modules.Friend
     {
         public bool? IsEnable { get; set; }
 
+        static bool Waiting = false;
+        static long? WaitUntil { get; set; }
+
+        static string? Target { get; set; }
+
         public static string? LastMessageFrom { get; set; }
 
         public async void Execute(MessageReceiverBase @base)
         {
-            var receiver = @base.Concretize<FriendMessageReceiver>();
-            if (receiver.FriendId == BotMain.OwnerQQ && receiver.MessageChain.GetPlainMessage().StartsWith("!send"))
+            FriendMessageReceiver receiver = @base.Concretize<FriendMessageReceiver>();
+            if (Waiting && receiver.Sender.Id == BotMain.OwnerQQ)
             {
-                string code = receiver.MessageChain.MiraiCode;
-                string[] s = code.Split(" ");
-                if (s.Length >= 3)
+                long TimeNow = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+                if (receiver.MessageChain.GetPlainMessage() == "!cancel" || TimeNow >= WaitUntil)
+                {
+                    await MessageManager.SendFriendMessageAsync(BotMain.OwnerQQ, "发送已取消！");
+                }
+                else
                 {
                     try
                     {
-                        await MessageManager.SendFriendMessageAsync(s[1], new MiraiCodeMessage(code.Replace($"!send {s[1]} ", "")));
+                        await MessageManager.SendFriendMessageAsync(Target, receiver.MessageChain);
+                        await MessageManager.SendFriendMessageAsync(BotMain.OwnerQQ, $"已将消息发送给 {Target}");
                     }
                     catch (Exception e)
                     {
@@ -49,42 +57,36 @@ namespace Net_Codeintp_cs.Modules.Friend
                         await receiver.SendMessageAsync("私聊消息发送失败！");
                     }
                 }
+                Waiting = false;
+            }
+            else if (receiver.FriendId == BotMain.OwnerQQ && receiver.MessageChain.GetPlainMessage().StartsWith("!send"))
+            {
+                string code = receiver.MessageChain.MiraiCode;
+                string[] s = code.Split(" ");
+                if (s.Length == 2)
+                {
+                    await MessageManager.SendFriendMessageAsync(BotMain.OwnerQQ, "请输入要发送的内容！（若要取消发送，请在聊天框中输入!cancel）");
+                    Target = s[1];
+                    Waiting = true;
+                    WaitUntil = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds() + 45;
+                }
                 else
                 {
                     await receiver.SendMessageAsync("缺少参数");
                 }
             }
-            else if (receiver.FriendId == BotMain.OwnerQQ && receiver.MessageChain.GetPlainMessage().StartsWith("!reply"))
+            else if (receiver.FriendId == BotMain.OwnerQQ && receiver.MessageChain.GetPlainMessage() == "!reply")
             {
                 if (LastMessageFrom != null)
                 {
-                    string code = receiver.MessageChain.MiraiCode;
-                    string[] s = code.Split(" ");
-                    if (s.Length >= 2)
-                    {
-                        try
-                        {
-                            await MessageManager.SendFriendMessageAsync(LastMessageFrom, new MiraiCodeMessage(code.Replace($"!send {s[1]} ", "")));
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.Error("私聊消息发送失败！");
-                            Logger.Debug($"错误信息：\n{e.Message}");
-                            await receiver.SendMessageAsync("私聊消息发送失败！");
-                        }
-                    }
+                    await MessageManager.SendFriendMessageAsync(BotMain.OwnerQQ, "请输入要回复的内容！（若要取消发送，请在聊天框中输入!cancel）");
+                    Target = LastMessageFrom;
+                    Waiting = true;
+                    WaitUntil = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds() + 45;
                 }
                 else
                 {
-                    try
-                    {
-                        await MessageManager.SendFriendMessageAsync(BotMain.OwnerQQ, "没有找到上一条消息的来源");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("私聊消息未能转发给机器人主人！（可能机器人主人不是机器人账号的好友）");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await MessageManager.SendFriendMessageAsync(BotMain.OwnerQQ, "没有找到上一条消息的来源");
                 }
             }
         }

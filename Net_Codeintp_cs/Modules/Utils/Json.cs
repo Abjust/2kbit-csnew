@@ -34,67 +34,6 @@ namespace Net_Codeintp_cs.Modules.Utils
                 return false;
             }
         }
-        public static bool ObjectExistsInArray(string filename, string location, string index, string? objectindex = null)
-        {
-            JObject o = ReadFile(filename);
-            JObject o1 = new();
-            JArray ar;
-            string[] indexsplit = index.Split("_");
-            if (location.Contains("."))
-            {
-                foreach (string part in location.Split("."))
-                {
-                    if (location.Split(".").Last() != part)
-                    {
-                        o1 = (JObject)o[part]!;
-                    }
-                    else
-                    {
-                        ar = (JArray)o1[part]!;
-                        foreach (JObject obj in ar.Cast<JObject>())
-                        {
-                            if ((string)obj[indexsplit[0]]! == indexsplit[1])
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-            else if (location.Contains(">"))
-            {
-                string[] split = location.Split(">");
-                string[] objectsplit = objectindex!.Split("_");
-                for (int i = 0; i < o[split[0]]!.Count(); i++)
-                {
-                    if ((string)o[split[0]]![i]![objectsplit[0]]! == objectsplit[1])
-                    {
-                        return true;
-                    }
-                }
-                ar = (JArray)o1[split[1]]!;
-                foreach (JObject obj in ar.Cast<JObject>())
-                {
-                    if ((string)obj[indexsplit[0]]! == indexsplit[1])
-                    {
-                        return true;
-                    }
-                }
-            }
-            else
-            {
-                ar = (JArray)o[location]!;
-                foreach (JObject obj in ar.Cast<JObject>())
-                {
-                    if ((string)obj[indexsplit[0]]! == indexsplit[1])
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
         public static void CreateFile(string filename, JObject objects)
         {
             using StreamWriter file = File.CreateText($"{path}\\data\\{filename}.json");
@@ -106,232 +45,133 @@ namespace Net_Codeintp_cs.Modules.Utils
         }
         public static JObject ReadFile(string filename)
         {
-            using FileStream fs = File.OpenRead($"{path}\\data\\{filename}.json");
-            using StreamReader file = new(fs);
+            using StreamReader file = new($"{path}\\data\\{filename}.json");
             using JsonTextReader reader = new(file);
             JObject o = (JObject)JToken.ReadFrom(reader);
             reader.Close();
             file.Close();
             return o;
         }
-        public static void AddObjectToArray(string filename, string location, JObject objects, string? property = null, object? value = null)
+        public static bool ObjectExistsInArray(string filename, string location, string property, object value)
         {
             JObject o = ReadFile(filename);
-            JObject o1 = new();
-            JArray ar;
-            if (location.Contains("."))
+            JArray ar = (JArray)o!.SelectToken(location)!;
+            if (ar.Children().Where(x => x.SelectToken(property)!.Value<string>()! == (string)value).FirstOrDefault()! != null)
             {
-                foreach (string part in location.Split("."))
-                {
-                    if (location.Split(".").Last() != part)
-                    {
-                        o1 = (JObject)o[part]!;
-                    }
-                    else
-                    {
-                        ar = (JArray)o1[part]!;
-                        ar.Add(objects);
-                        File.WriteAllText($"{path}\\data\\{filename}.json", o.ToString());
-                    }
-                }
-            }
-            else if (location.Contains(">"))
-            {
-                string[] split = location.Split(">");
-                for (int i = 0; i < o[split[0]]!.Count(); i++)
-                {
-                    if ((string)o[split[0]]![i]![property!]! == (string)value!)
-                    {
-                        o1 = (JObject)o[split[0]]![i]!;
-                        break;
-                    }
-                }
-                ar = (JArray)o1[split[1]]!;
-                ar.Add(objects);
-                File.WriteAllText($"{path}\\data\\{filename}.json", o.ToString());
+                return true;
             }
             else
             {
-                ar = (JArray)o[location]!;
-                ar.Add(objects);
-                File.WriteAllText($"{path}\\data\\{filename}.json", o.ToString());
+                return false;
             }
         }
-        public static void DeleteObjectFromArray(string filename, string location, string index, string? objectindex = null)
+        public static void AddObjectToArray(string filename, string location, JObject objects, string? index = null, object? indexvalue = null)
         {
             JObject o = ReadFile(filename);
-            JObject o1 = new();
+            string[] s = location.Split(".");
             JArray ar;
-            string[] indexsplit = index.Split("_");
-            if (location.Contains("."))
+            switch (index)
             {
-                foreach (string part in location.Split("."))
-                {
-                    if (location.Split(".").Last() != part)
+                case null:
+                    switch (location.Contains("."))
                     {
-                        o1 = (JObject)o[part]!;
+                        case true:
+                            ar = (JArray)o.SelectToken(s[0])!.SelectToken(s[1])!;
+                            break;
+                        case false:
+                            ar = (JArray)o!.SelectToken(s[0])!;
+                            break;
                     }
-                    else
+                    break;
+                default:
+                    switch (location.Contains("."))
                     {
-                        ar = (JArray)o1[part]!;
-                        foreach (JObject obj in ar.Cast<JObject>())
-                        {
-                            if ((string)obj[indexsplit[0]]! == indexsplit[1])
-                            {
-                                ar.Remove(obj);
-                                break;
-                            }
-                        }
-                        File.WriteAllText($"{path}\\data\\{filename}.json", o.ToString());
+                        case true:
+                            ar = (JArray)o!.SelectToken(s[0])!.Children().Where(x => x.SelectToken(index)!.ToString() == indexvalue!.ToString()).FirstOrDefault()!.SelectToken(s[1])!;
+                            break;
+                        case false:
+                            ar = (JArray)o!.SelectToken(s[0])!;
+                            break;
                     }
-                }
+                    break;
             }
-            else if (location.Contains(">"))
-            {
-                string[] split = location.Split(">");
-                string[] objectsplit = objectindex!.Split("_");
-                for (int i = 0; i < o[split[0]]!.Count(); i++)
-                {
-                    if ((string)o[split[0]]![i]![objectsplit[0]]! == objectsplit[1])
-                    {
-                        o1 = (JObject)o[split[0]]![i]!;
-                        break;
-                    }
-                }
-                ar = (JArray)o1[split[1]]!;
-                foreach (JObject obj in ar.Cast<JObject>())
-                {
-                    if ((string)obj[indexsplit[0]]! == indexsplit[1])
-                    {
-                        ar.Remove(obj);
-                        break;
-                    }
-                }
-                File.WriteAllText($"{path}\\data\\{filename}.json", o.ToString());
-            }
-            else
-            {
-                ar = (JArray)o[location]!;
-                foreach (JObject obj in ar.Cast<JObject>())
-                {
-                    if ((string)obj[indexsplit[0]]! == indexsplit[1])
-                    {
-                        ar.Remove(obj);
-                        break;
-                    }
-                }
-                File.WriteAllText($"{path}\\data\\{filename}.json", o.ToString());
-            }
+            ar.Add(objects);
+            File.WriteAllText($"{path}\\data\\{filename}.json", o.ToString());
         }
-        public static void ModifyObjectFromArray(string filename, string location, string index, string property, Type type, object value, string? objectindex = null)
+        public static void DeleteObjectFromArray(string filename, string location, string index, object indexvalue, string? objectindex = null, object? objectindexvalue = null)
         {
             JObject o = ReadFile(filename);
-            JObject o1 = new();
+            string[] s = location.Split(".");
             JArray ar;
-            string[] indexsplit = index.Split("_");
-            if (location.Contains("."))
+            switch (objectindex)
             {
-                foreach (string part in location.Split("."))
-                {
-                    if (location.Split(".").Last() != part)
+                case null:
+                    switch (location.Contains("."))
                     {
-                        o1 = (JObject)o[part]!;
+                        case true:
+                            ar = (JArray)o.SelectToken(s[0])!.SelectToken(s[1])!;
+                            break;
+                        case false:
+                            ar = (JArray)o!.SelectToken(s[0])!;
+                            break;
                     }
-                    else
+                    break;
+                default:
+                    switch (location.Contains("."))
                     {
-                        ar = (JArray)o1[part]!;
-                        foreach (JObject obj in ar.Cast<JObject>())
-                        {
-                            if ((string)obj[indexsplit[0]]! == indexsplit[1])
-                            {
-                                switch (type)
-                                {
-                                    case Type intType when intType == typeof(int):
-                                        obj[property] = int.Parse((string)value);
-                                        break;
-                                    case Type longType when longType == typeof(long):
-                                        obj[property] = long.Parse((string)value);
-                                        break;
-                                    case Type stringType when stringType == typeof(string):
-                                        obj[property] = (string)value;
-                                        break;
-                                }
-                                break;
-                            }
-                        }
-                        File.WriteAllText($"{path}\\data\\{filename}.json", o.ToString());
+                        case true:;
+                            ar = (JArray)o!.SelectToken(s[0])!.Children().Where(x => x.SelectToken(objectindex)!.ToString() == objectindexvalue!.ToString()).FirstOrDefault()!.SelectToken(s[1])!;
+                            break;
+                        case false:
+                            ar = (JArray)o!.SelectToken(s[0])!;
+                            break;
                     }
-                }
+                    break;
             }
-            else if (location.Contains(">"))
-            {
-                string[] split = location.Split(">");
-                string[] objectsplit = objectindex!.Split("_");
-                for (int i = 0; i < o[split[0]]!.Count(); i++)
-                {
-                    if ((string)o[split[0]]![i]![objectsplit[0]]! == objectsplit[1])
-                    {
-                        o1 = (JObject)o[split[0]]![i]!;
-                        break;
-                    }
-                }
-                ar = (JArray)o1[split[1]]!;
-                Logger.Debug("Array:");
-                Logger.Debug(ar);
-                foreach (JObject obj in ar.Cast<JObject>())
-                {
-                    if ((string)obj[indexsplit[0]]! == indexsplit[1])
-                    {
-                        switch (type)
-                        {
-                            case Type intType when intType == typeof(int):
-                                obj[property] = int.Parse((string)value);
-                                break;
-                            case Type longType when longType == typeof(long):
-                                obj[property] = long.Parse((string)value);
-                                break;
-                            case Type stringType when stringType == typeof(string):
-                                obj[property] = (string)value;
-                                break;
-                        }
-                        break;
-                    }
-                }
-                Logger.Debug("Modified Array:");
-                Logger.Debug(ar);
-                File.WriteAllText($"{path}\\data\\{filename}.json", o.ToString());
-            }
-            else
-            {
-                ar = (JArray)o[location]!;
-                foreach (JObject obj in ar.Cast<JObject>())
-                {
-                    if ((string)obj[indexsplit[0]]! == indexsplit[1])
-                    {
-                        switch (type)
-                        {
-                            case Type intType when intType == typeof(int):
-                                obj[property] = (int)value;
-                                break;
-                            case Type longType when longType == typeof(long):
-                                obj[property] = (long)value;
-                                break;
-                            case Type doubleType when doubleType == typeof(double):
-                                obj[property] = (double)value;
-                                break;
-                            case Type stringType when stringType == typeof(string):
-                                obj[property] = (string)value;
-                                break;
-                        }
-                        break;
-                    }
-                }
-                File.WriteAllText($"{path}\\data\\{filename}.json", o.ToString());
-            }
+            ar.Remove(ar.Children().Where(x => x.SelectToken(index)!.ToString() == indexvalue.ToString()).FirstOrDefault()!);
+            File.WriteAllText($"{path}\\data\\{filename}.json", o.ToString());
         }
-        public static void ReplaceObjectFromArray(string filename, string location, string index, JObject objects, string? objectindex = null)
+        public static void ModifyObjectFromArray(string filename, string location, string index, object indexvalue, string property, object value, string? objectindex = null, object? objectindexvalue = null)
         {
-
+            JObject o = ReadFile(filename);
+            string[] s = location.Split(".");
+            JArray ar;
+            switch (objectindex)
+            {
+                case null:
+                    switch (location.Contains("."))
+                    {
+                        case true:
+                            ar = (JArray)o.SelectToken(s[0])!.SelectToken(s[1])!;
+                            break;
+                        case false:
+                            ar = (JArray)o!.SelectToken(s[0])!;
+                            break;
+                    }
+                    break;
+                default:
+                    switch (location.Contains("."))
+                    {
+                        case true:
+                            ar = (JArray)o!.SelectToken(s[0])!.Children().Where(x => x.SelectToken(objectindex)!.ToString() == objectindexvalue!.ToString()).FirstOrDefault()!.SelectToken(s[1])!;
+                            break;
+                        case false:
+                            ar = (JArray)o!.SelectToken(s[0])!;
+                            break;
+                    }
+                    break;
+            }
+            JObject obj = (JObject)ar.Children().Where(x => x.SelectToken(index)!.ToString() == indexvalue!.ToString()).FirstOrDefault()!;
+            obj[property] = JToken.FromObject(value);
+            File.WriteAllText($"{path}\\data\\{filename}.json", o.ToString());
+        }
+        public static JArray Sort(JArray array, string index, bool desc)
+        {
+            return desc switch
+            {
+                true => new JArray(array.OrderByDescending(obj => (string)obj[index]!)),
+                _ => new JArray(array.OrderBy(obj => (string)obj[index]!)),
+            };
         }
     }
 }

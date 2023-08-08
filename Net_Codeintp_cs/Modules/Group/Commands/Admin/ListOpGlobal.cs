@@ -10,51 +10,58 @@
 
 /**
  * 2kbit C# Edition: New
- * 跨群公告播报模块
+ * 群管模块：列举全局机器人管理员
 **/
 
 using Mirai.Net.Data.Messages;
-using Mirai.Net.Data.Messages.Concretes;
 using Mirai.Net.Data.Messages.Receivers;
 using Mirai.Net.Modules;
-using Mirai.Net.Sessions.Http.Managers;
 using Mirai.Net.Utils.Scaffolds;
 using Net_Codeintp_cs.Modules.Utils;
 
-namespace Net_Codeintp_cs.Modules.Group.Commands
+namespace Net_Codeintp_cs.Modules.Group.Commands.Admin
 {
-    internal class Announce : IModule
+    internal class ListOpGlobal : IModule
     {
         public bool? IsEnable { get; set; }
 
         public async void Execute(MessageReceiverBase @base)
         {
             GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
-            if (receiver.MessageChain.GetPlainMessage().StartsWith("!announce") && receiver.MessageChain.GetPlainMessage().Split(" ").Length >= 2)
+            string[] s = receiver.MessageChain.GetPlainMessage().Split(" ");
+            if (s[0] == "!listopg")
             {
-                if (receiver.Sender.Id == BotMain.OwnerQQ)
+                if (Permission.OpsGlobal != null)
                 {
-                    Logger.Info($"已跨群播报公告！\n执行者：{receiver.Sender.Id}");
-                    IEnumerable<Mirai.Net.Data.Shared.Group> groups = AccountManager.GetGroupsAsync().GetAwaiter().GetResult();
-                    foreach (Mirai.Net.Data.Shared.Group group in groups)
+                    string ids = "";
+                    foreach (string qq in Permission.OpsGlobal)
                     {
-                        try
+                        if (Permission.OpsGlobal.IndexOf(qq) == 0)
                         {
-                            await group.SendGroupMessageAsync(new MiraiCodeMessage(receiver.MessageChain.MiraiCode.Replace("!announce ", "")));
+                            ids += qq;
                         }
-                        catch (Exception e)
+                        else
                         {
-                            Logger.Error("群消息发送失败！");
-                            Logger.Debug($"错误信息：\n{e.Message}");
+                            ids += $"、{qq}";
                         }
+                    }
+                    Logger.Info($"已尝试列举全局机器人管理员！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
+                    try
+                    {
+                        await receiver.SendMessageAsync($"当前全局机器人管理员：{ids}");
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error("群消息发送失败！");
+                        Logger.Debug($"错误信息：\n{e.Message}");
                     }
                 }
                 else
                 {
-                    Logger.Warning($"未尝试播报跨群公告，因为执行者不是机器人主人！\n执行者：{receiver.Sender.Id}");
+                    Logger.Warning($"未尝试列举全局机器人管理员，因为没有设置全局机器人管理员！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
                     try
                     {
-                        await receiver.SendMessageAsync("你不是机器人主人");
+                        await receiver.SendMessageAsync("当前没有设置全局机器人管理员！");
                     }
                     catch (Exception e)
                     {

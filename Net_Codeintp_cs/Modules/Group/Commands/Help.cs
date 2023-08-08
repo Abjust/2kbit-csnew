@@ -27,7 +27,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
 
         public async void Execute(MessageReceiverBase @base)
         {
-            var receiver = @base.Concretize<GroupMessageReceiver>();
+            GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
             if (receiver.MessageChain.GetPlainMessage() == "菜单" || receiver.MessageChain.GetPlainMessage() == "!menu")
             {
                 try

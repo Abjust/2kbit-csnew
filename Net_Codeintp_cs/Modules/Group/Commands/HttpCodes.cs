@@ -107,9 +107,9 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
                             "503 Service Unavailable\n由于临时的服务器维护或者过载，服务器当前无法处理请求。这个状况是暂时的，并且将在一段时间以后恢复。（服务器：和蔼！任何DDoS，终将绳之以法！）",
                             "504 Gateway Timeout\n作为网关或者代理工作的服务器尝试执行请求时，未能及时从上游服务器（URI标识出的服务器，例如HTTP、FTP、LDAP）或者辅助服务器（例如DNS）收到响应。"
                         };
-            var receiver = @base.Concretize<GroupMessageReceiver>();
+            GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
             string[] s = receiver.MessageChain.GetPlainMessage().Split(" ");
-            if (receiver.MessageChain.GetPlainMessage().StartsWith("!http"))
+            if (s[0] == "!http" || s[0] == "!httpcat")
             {
                 switch (s.Length)
                 {
@@ -120,7 +120,12 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
                             {
                                 try
                                 {
-                                    await receiver.QuoteMessageAsync(explanations[codes.IndexOf(code)]);
+                                    await receiver.QuoteMessageAsync("正在加载，请稍候……");
+                                    MessageChain messageChain = new MessageChainBuilder()
+                                    .Plain(explanations[codes.IndexOf(code)])
+                                    .ImageFromUrl($"https://http.cat/{code}")
+                                    .Build();
+                                    await receiver.QuoteMessageAsync(messageChain);
                                 }
                                 catch (Exception ex)
                                 {

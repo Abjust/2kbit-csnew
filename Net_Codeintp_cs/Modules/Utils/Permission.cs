@@ -26,72 +26,29 @@ namespace Net_Codeintp_cs.Modules.Utils
         public const int None = 0;
         public const int GroupAdmin = 1;
         public const int GlobalAdmin = 2;
-        public static bool Initialized = false;
         public static bool IsGlobalAdmin(string qq)
         {
-            if (Initialized)
-            {
-                return OpsGlobal!.Contains(qq);
-            }
-            else
-            {
-                return false;
-            }
+            return OpsGlobal!.Contains(qq);
         }
         public static bool IsGroupAdmin(string groupid, string qq)
         {
-            if (Initialized)
-            {
-                return Ops!.Contains($"{groupid}_{qq}") || IsGlobalAdmin(qq);
-            }
-            else
-            {
-                return false;
-            }
+            return Ops!.Contains($"{groupid}_{qq}") || IsGlobalAdmin(qq);
         }
         public static bool IsBlockedGlobal(string qq)
         {
-            if (Initialized)
-            {
-                return BlocklistGlobal!.Contains(qq);
-            }
-            else
-            {
-                return false;
-            }
+            return BlocklistGlobal!.Contains(qq);
         }
         public static bool IsBlocked(string groupid, string qq)
         {
-            if (Initialized)
-            {
-                return Blocklist!.Contains($"{groupid}_{qq}") || IsBlockedGlobal(qq);
-            }
-            else
-            {
-                return false;
-            }
+            return Blocklist!.Contains($"{groupid}_{qq}") || IsBlockedGlobal(qq);
         }
         public static bool IsIgnoredGlobal(string qq)
         {
-            if (Initialized)
-            {
-                return IgnoresGlobal!.Contains(qq);
-            }
-            else
-            {
-                return false;
-            }
+            return IgnoresGlobal!.Contains(qq);
         }
         public static bool IsIgnored(string groupid, string qq)
         {
-            if (Initialized)
-            {
-                return Ignores!.Contains($"{groupid}_{qq}") || IsIgnoredGlobal(qq);
-            }
-            else
-            {
-                return false;
-            }
+            return Ignores!.Contains($"{groupid}_{qq}") || IsIgnoredGlobal(qq);
         }
     }
 }

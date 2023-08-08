@@ -27,12 +27,12 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
 
         public async void Execute(MessageReceiverBase @base)
         {
-            var receiver = @base.Concretize<GroupMessageReceiver>();
+            GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
             if (receiver.MessageChain.GetPlainMessage() == "版本")
             {
                 List<string> splashes = new()
                         {
-                            "也试试HanBot罢！Also try HanBot!",
+                            "也试试KuoHuBit罢！Also try KuoHuBit!",
                             "誓死捍卫微软苏维埃！",
                             "打倒MF独裁分子！",
                             "要把反革命分子的恶臭思想，扫进历史的垃圾堆！",
@@ -56,7 +56,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
                 int random = r.Next(splashes.Count);
                 try
                 {
-                    await receiver.SendMessageAsync($"机器人版本：2kbit C# Edition: New b_23w01a\n上次更新日期：2023/8/4\n更新内容：实现了2kbit C# Edition的基本所有功能（除了自动任务和相似度计算）\n---------\n{splashes[random]}");
+                    await receiver.SendMessageAsync($"机器人版本：2kbit C# Edition: New b_23w02a\n上次更新日期：2023/8/5\n更新内容：优化了JSON的实现方法；拆分了3个大功能的各个指令，以便后续维护；实现了伪自动任务；新增定时任务功能\n---------\n{splashes[random]}");
                 }
                 catch (Exception e)
                 {

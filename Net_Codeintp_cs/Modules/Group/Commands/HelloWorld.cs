@@ -17,6 +17,7 @@ using Mirai.Net.Data.Messages;
 using Mirai.Net.Data.Messages.Receivers;
 using Mirai.Net.Modules;
 using Mirai.Net.Utils.Scaffolds;
+using Net_Codeintp_cs.Modules.Group.Tasks;
 
 namespace Net_Codeintp_cs.Modules.Group.Commands
 {
@@ -26,7 +27,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
 
         public async void Execute(MessageReceiverBase @base)
         {
-            var receiver = @base.Concretize<GroupMessageReceiver>();
+            GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
             switch (receiver.MessageChain.GetPlainMessage())
             {
                 case "!test":
