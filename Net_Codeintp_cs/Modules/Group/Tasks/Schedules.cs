@@ -51,14 +51,17 @@ namespace Net_Codeintp_cs.Modules.Group.Tasks
             IEnumerable<Mirai.Net.Data.Shared.Group> groups = AccountManager.GetGroupsAsync().GetAwaiter().GetResult();
             foreach (Mirai.Net.Data.Shared.Group group in groups)
             {
-                try
+                if (!Permission.IsOptedOut(group.Id))
                 {
-                    await group.SendGroupMessageAsync(new MiraiCodeMessage(message));
-                }
-                catch (Exception e)
-                {
-                    Logger.Error("群消息发送失败！");
-                    Logger.Debug($"错误信息：\n{e.Message}");
+                    try
+                    {
+                        await group.SendGroupMessageAsync(new MiraiCodeMessage(message));
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error("群消息发送失败！");
+                        Logger.Debug($"错误信息：\n{e.Message}");
+                    }
                 }
             }
         }

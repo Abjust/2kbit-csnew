@@ -23,6 +23,7 @@ namespace Net_Codeintp_cs.Modules.Utils
         public static List<string>? BlocklistGlobal { get; set; }
         public static List<string>? Ignores { get; set; }
         public static List<string>? IgnoresGlobal { get; set; }
+        public static List<string>? OptedOut { get; set; }
         public const int None = 0;
         public const int GroupAdmin = 1;
         public const int GlobalAdmin = 2;
@@ -49,6 +50,10 @@ namespace Net_Codeintp_cs.Modules.Utils
         public static bool IsIgnored(string groupid, string qq)
         {
             return Ignores!.Contains($"{groupid}_{qq}") || IsIgnoredGlobal(qq);
+        }
+        public static bool IsOptedOut(string groupid)
+        {
+            return OptedOut!.Contains(groupid);
         }
     }
 }

@@ -101,6 +101,8 @@ namespace Net_Codeintp_cs
             }
             // 初始化权限
             Modules.Group.Commands.Admin.Update.Do();
+            // 初始化排除
+            Modules.Group.Commands.Choice.Update.Do();
             // 初始化bot
             MiraiBot bot = new();
             try
@@ -158,7 +160,7 @@ namespace Net_Codeintp_cs
                                  "四吗玩意，说我是歌姬吧，你怎么不撒泡尿照照镜子看看你自己，狗比玩意",
                                  "握草泥马呀—\r\n我操尼玛啊啊啊啊—\r\n我—操—你—妈—\r\n听到没，我—操—你—妈—"
                             };
-                if (receiver.Target == BotQQ && receiver.Subject.Kind == "Group")
+                if (receiver.Target == BotQQ && receiver.Subject.Kind == "Group" && !Permission.IsOptedOut(receiver.Subject.Id))
                 {
                     Random r = new();
                     int index = r.Next(words.Length);
@@ -207,7 +209,7 @@ namespace Net_Codeintp_cs
             .OfType<NewMemberRequestedEvent>()
             .Subscribe(async e =>
             {
-                if (Permission.IsBlocked(e.GroupId, e.FromId))
+                if (Permission.IsBlocked(e.GroupId, e.FromId) && !Permission.IsOptedOut(e.GroupId))
                 {
                     await e.RejectAsync("2kbit 已将此人识别为黑名单成员，禁止进入");
                 }
@@ -220,17 +222,19 @@ namespace Net_Codeintp_cs
                 if (receiver.Current != "")
                 {
                     Logger.Info($"侦测到改名！\n群：{receiver.Member.Group.Name} ({receiver.Member.Group.Id})\r\nQQ号：{receiver.Member.Id}\n原昵称：{receiver.Origin}\n新昵称：{receiver.Current}");
-                    try
+                    if (!Permission.IsOptedOut(receiver.Group.Id))
                     {
-                        await MessageManager.SendGroupMessageAsync(receiver.Member.Group.Id, $"QQ号：{receiver.Member.Id}\n原昵称：{receiver.Origin}\n新昵称：{receiver.Current}");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
+                        try
+                        {
+                            await MessageManager.SendGroupMessageAsync(receiver.Member.Group.Id, $"QQ号：{receiver.Member.Id}\n原昵称：{receiver.Origin}\n新昵称：{receiver.Current}");
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.Error("群消息发送失败！");
+                            Logger.Debug($"错误信息：\n{e.Message}");
+                        }
                     }
                 }
-
             });
             // 侦测撤回
             bot.EventReceived
@@ -242,9 +246,24 @@ namespace Net_Codeintp_cs
                 .At(receiver.Operator.Id)
                 .Plain(" 你又撤回了什么见不得人的东西？")
                 .Build();
-               if (receiver.AuthorId != receiver.Operator.Id)
+               if (!Permission.IsOptedOut(receiver.Group.Id))
                {
-                   if (receiver.Operator.Permission.ToString() != "Administrator" && receiver.Operator.Permission.ToString() != "Owner")
+                   if (receiver.AuthorId != receiver.Operator.Id)
+                   {
+                       if (receiver.Operator.Permission.ToString() != "Administrator" && receiver.Operator.Permission.ToString() != "Owner")
+                       {
+                           try
+                           {
+                               await MessageManager.SendGroupMessageAsync(receiver.Group.Id, messageChain);
+                           }
+                           catch (Exception e)
+                           {
+                               Logger.Error("群消息发送失败！");
+                               Logger.Debug($"错误信息：\n{e.Message}");
+                           }
+                       }
+                   }
+                   else
                    {
                        try
                        {
@@ -257,18 +276,6 @@ namespace Net_Codeintp_cs
                        }
                    }
                }
-               else
-               {
-                   try
-                   {
-                       await MessageManager.SendGroupMessageAsync(receiver.Group.Id, messageChain);
-                   }
-                   catch (Exception e)
-                   {
-                       Logger.Error("群消息发送失败！");
-                       Logger.Debug($"错误信息：\n{e.Message}");
-                   }
-               }
            });
             // 侦测踢人
             bot.EventReceived
@@ -276,14 +283,17 @@ namespace Net_Codeintp_cs
             .Subscribe(async receiver =>
             {
                 Logger.Info($"侦测到踢人！\n群：{receiver.Member.Group.Name} ({receiver.Member.Group.Id})\n执行者：{receiver.Operator.Name} ({receiver.Operator.Id})\n被执行者：{receiver.Member.Name} ({receiver.Member.Id})");
-                try
+                if (!Permission.IsOptedOut(receiver.Operator.Group.Id))
                 {
-                    await MessageManager.SendGroupMessageAsync(receiver.Member.Group.Id, $"{receiver.Member.Name} ({receiver.Member.Id}) 被踢出去辣，好似，开香槟咯！");
-                }
-                catch (Exception e)
-                {
-                    Logger.Error("群消息发送失败！");
-                    Logger.Debug($"错误信息：\n{e.Message}");
+                    try
+                    {
+                        await MessageManager.SendGroupMessageAsync(receiver.Member.Group.Id, $"{receiver.Member.Name} ({receiver.Member.Id}) 被踢出去辣，好似，开香槟咯！");
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error("群消息发送失败！");
+                        Logger.Debug($"错误信息：\n{e.Message}");
+                    }
                 }
             });
             // 侦测退群
@@ -292,14 +302,17 @@ namespace Net_Codeintp_cs
             .Subscribe(async receiver =>
             {
                 Logger.Info($"侦测到退群！\n群：{receiver.Member.Group.Name} ({receiver.Member.Group.Id})\n当事者：{receiver.Member.Name} ({receiver.Member.Id})");
-                try
+                if (!Permission.IsOptedOut(receiver.Member.Group.Id))
                 {
-                    await MessageManager.SendGroupMessageAsync(receiver.Member.Group.Id, $"{receiver.Member.Name} ({receiver.Member.Id}) 退群力（悲）");
-                }
-                catch (Exception e)
-                {
-                    Logger.Error("群消息发送失败！");
-                    Logger.Debug($"错误信息：\n{e.Message}");
+                    try
+                    {
+                        await MessageManager.SendGroupMessageAsync(receiver.Member.Group.Id, $"{receiver.Member.Name} ({receiver.Member.Id}) 退群力（悲）");
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error("群消息发送失败！");
+                        Logger.Debug($"错误信息：\n{e.Message}");
+                    }
                 }
             });
             // 侦测入群
@@ -312,14 +325,17 @@ namespace Net_Codeintp_cs
                .At(receiver.Member.Id)
                .Plain(" 来辣，让我们一起撅新人！（bushi")
                .Build();
-                try
+                if (!Permission.IsOptedOut(receiver.Member.Group.Id))
                 {
-                    await MessageManager.SendGroupMessageAsync(receiver.Member.Group.Id, messageChain);
-                }
-                catch (Exception e)
-                {
-                    Logger.Error("群消息发送失败！");
-                    Logger.Debug($"错误信息：\n{e.Message}");
+                    try
+                    {
+                        await MessageManager.SendGroupMessageAsync(receiver.Member.Group.Id, messageChain);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error("群消息发送失败！");
+                        Logger.Debug($"错误信息：\n{e.Message}");
+                    }
                 }
             });
             // 加载私聊消息模块
@@ -342,10 +358,12 @@ namespace Net_Codeintp_cs
             }
             bot.MessageReceived.SubscribeGroupMessage(group =>
             {
-                if (!Permission.IsIgnored(group.GroupId, group.Sender.Id))
+                if (!Permission.IsOptedOut(group.GroupId) || group.MessageChain.GetPlainMessage() == "!optin" || group.MessageChain.GetPlainMessage() == "!optout")
                 {
-                    Random random = new();
-                    group_modules.Raise(group);
+                    if (!Permission.IsIgnored(group.GroupId, group.Sender.Id))
+                    {
+                        group_modules.Raise(group);
+                    }
                 }
             });
             await Schedules.Initialize();
