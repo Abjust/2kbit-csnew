@@ -17,7 +17,6 @@ using Mirai.Net.Data.Messages;
 using Mirai.Net.Data.Messages.Receivers;
 using Mirai.Net.Modules;
 using Mirai.Net.Utils.Scaffolds;
-using Net_Codeintp_cs.Modules.Group.Tasks;
 
 namespace Net_Codeintp_cs.Modules.Group.Commands
 {

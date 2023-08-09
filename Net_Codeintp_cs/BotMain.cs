@@ -24,8 +24,6 @@ using Mirai.Net.Sessions.Http.Managers;
 using Mirai.Net.Utils.Scaffolds;
 using Net_Codeintp_cs.Modules.Group.Tasks;
 using Net_Codeintp_cs.Modules.Utils;
-using Quartz;
-using System.Collections.Specialized;
 using System.Reactive.Linq;
 using System.Reflection;
 

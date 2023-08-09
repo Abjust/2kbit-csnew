@@ -19,7 +19,6 @@ using Mirai.Net.Modules;
 using Mirai.Net.Utils.Scaffolds;
 using Net_Codeintp_cs.Modules.Utils;
 using Newtonsoft.Json.Linq;
-using System.Reflection.PortableExecutable;
 
 namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
 {

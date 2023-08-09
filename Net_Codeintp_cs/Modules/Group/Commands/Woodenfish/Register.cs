@@ -39,7 +39,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                         new JArray()));
                     Json.CreateFile("woodenfish", obj);
                 }
-                if (!Json.ObjectExistsInArray("woodenfish", "players", "groupid", receiver.Sender.Id))
+                if (!Json.ObjectExistsInArray("woodenfish", "players", "playerid", receiver.Sender.Id))
                 {
                     JObject obj = new(
                         new JProperty("playerid", receiver.Sender.Id),
