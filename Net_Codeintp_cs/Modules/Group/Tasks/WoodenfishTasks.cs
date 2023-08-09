@@ -41,7 +41,7 @@ namespace Net_Codeintp_cs.Modules.Group.Tasks
                     e = (double)p["e"]! * Math.Pow(Math.E, (double)p["nirvana"]!) + (int)p["level"]!;
                 }
                 Json.ModifyObjectFromArray("woodenfish", "players", "playerid", playerid, "e", e);
-                Json.ModifyObjectFromArray("woodenfish", "players", "playerid", playerid, "time", TimeNow);
+                Json.ModifyObjectFromArray("woodenfish", "players", "playerid", playerid, "time", TimeNow - (TimeNow % Math.Ceiling((double)cyclespeed)));
             }
         }
     }
