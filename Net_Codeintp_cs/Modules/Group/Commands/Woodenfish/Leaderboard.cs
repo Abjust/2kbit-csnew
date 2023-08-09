@@ -47,7 +47,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                         {
                             listed.Add((string)obj["playerid"]!);
                             MessageChain messageChain1 = new MessageChainBuilder()
-                                    .Plain($"\n{obj["playerid"]!} --- ee{Math.Truncate(10000 * (double)obj["ee"]! / 10000)}")
+                                    .Plain($"\n{obj["playerid"]!} --- ee{Math.Truncate(10000 * (double)obj["ee"]!) / 10000}")
                                     .Build();
                             foreach (MessageBase message in messageChain1)
                             {
@@ -62,7 +62,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                         {
                             listed.Add((string)obj["playerid"]!);
                             MessageChain messageChain1 = new MessageChainBuilder()
-                                    .Plain($"\n{obj["playerid"]!} --- e{Math.Truncate(10000 * (double)obj["e"]! / 10000)}")
+                                    .Plain($"\n{obj["playerid"]!} --- e{Math.Truncate(10000 * (double)obj["e"]!) / 10000}")
                                     .Build();
                             foreach (MessageBase message in messageChain1)
                             {
