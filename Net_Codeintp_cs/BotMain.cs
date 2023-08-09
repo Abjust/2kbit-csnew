@@ -222,7 +222,7 @@ namespace Net_Codeintp_cs
                 if (receiver.Current != "")
                 {
                     Logger.Info($"侦测到改名！\n群：{receiver.Member.Group.Name} ({receiver.Member.Group.Id})\r\nQQ号：{receiver.Member.Id}\n原昵称：{receiver.Origin}\n新昵称：{receiver.Current}");
-                    if (!Permission.IsOptedOut(receiver.Group.Id))
+                    if (!Permission.IsOptedOut(receiver.Member.Group.Id))
                     {
                         try
                         {
@@ -283,7 +283,7 @@ namespace Net_Codeintp_cs
             .Subscribe(async receiver =>
             {
                 Logger.Info($"侦测到踢人！\n群：{receiver.Member.Group.Name} ({receiver.Member.Group.Id})\n执行者：{receiver.Operator.Name} ({receiver.Operator.Id})\n被执行者：{receiver.Member.Name} ({receiver.Member.Id})");
-                if (!Permission.IsOptedOut(receiver.Operator.Group.Id))
+                if (!Permission.IsOptedOut(receiver.Member.Group.Id))
                 {
                     try
                     {

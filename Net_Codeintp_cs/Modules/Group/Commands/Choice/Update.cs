@@ -22,6 +22,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Choice
     {
         public static void Do()
         {
+            Permission.OptedOut = new();
             if (!Json.FileExists("optedout"))
             {
                 JObject objects = new(
@@ -30,7 +31,6 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Choice
                 Json.CreateFile("optedout", objects);
             }
             JObject obj = Json.ReadFile("optedout");
-            Permission.OptedOut = new();
             if ((JArray)obj["groups"]! != null)
             {
                 foreach (JObject item in ((JArray)obj["groups"]!).Cast<JObject>())
