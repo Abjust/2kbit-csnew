@@ -86,6 +86,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                         else
                         {
                             Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "info_count", 1);
+                            Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "info_time", new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds());
                         }
                         string gongde;
                         string expression = "";
