@@ -73,7 +73,7 @@ namespace Net_Codeintp_cs.Modules.Utils
             switch (index)
             {
                 case null:
-                    switch (location.Contains("."))
+                    switch (location.Contains('.'))
                     {
                         case true:
                             ar = (JArray)o.SelectToken(s[0])!.SelectToken(s[1])!;
@@ -84,7 +84,7 @@ namespace Net_Codeintp_cs.Modules.Utils
                     }
                     break;
                 default:
-                    switch (location.Contains("."))
+                    switch (location.Contains('.'))
                     {
                         case true:
                             ar = (JArray)o!.SelectToken(s[0])!.Children().Where(x => x.SelectToken(index)!.ToString() == indexvalue!.ToString()).FirstOrDefault()!.SelectToken(s[1])!;
@@ -106,7 +106,7 @@ namespace Net_Codeintp_cs.Modules.Utils
             switch (objectindex)
             {
                 case null:
-                    switch (location.Contains("."))
+                    switch (location.Contains('.'))
                     {
                         case true:
                             ar = (JArray)o.SelectToken(s[0])!.SelectToken(s[1])!;
@@ -117,9 +117,10 @@ namespace Net_Codeintp_cs.Modules.Utils
                     }
                     break;
                 default:
-                    switch (location.Contains("."))
+                    switch (location.Contains('.'))
                     {
-                        case true:;
+                        case true:
+                            ;
                             ar = (JArray)o!.SelectToken(s[0])!.Children().Where(x => x.SelectToken(objectindex)!.ToString() == objectindexvalue!.ToString()).FirstOrDefault()!.SelectToken(s[1])!;
                             break;
                         case false:
@@ -139,7 +140,7 @@ namespace Net_Codeintp_cs.Modules.Utils
             switch (objectindex)
             {
                 case null:
-                    switch (location.Contains("."))
+                    switch (location.Contains('.'))
                     {
                         case true:
                             ar = (JArray)o.SelectToken(s[0])!.SelectToken(s[1])!;
@@ -150,7 +151,7 @@ namespace Net_Codeintp_cs.Modules.Utils
                     }
                     break;
                 default:
-                    switch (location.Contains("."))
+                    switch (location.Contains('.'))
                     {
                         case true:
                             ar = (JArray)o!.SelectToken(s[0])!.Children().Where(x => x.SelectToken(objectindex)!.ToString() == objectindexvalue!.ToString()).FirstOrDefault()!.SelectToken(s[1])!;

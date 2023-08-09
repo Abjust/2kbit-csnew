@@ -64,7 +64,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Bread
                                                 fields[i] = rnd.Next((int)Math.Floor((number - sum) * (1 - exponent)) + 1);
                                                 sum += fields[i];
                                             }
-                                            fields[fields.Length - 1] = number - sum;
+                                            fields[^1] = number - sum;
                                             switch (number)
                                             {
                                                 case <= 20:
@@ -179,7 +179,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Bread
                                             fields[i] = rnd.Next((int)Math.Floor((1 - sum) * (1 - exponent)));
                                             sum += fields[i];
                                         }
-                                        fields[fields.Length - 1] = 1 - sum;
+                                        fields[^1] = 1 - sum;
                                         for (int i = 0; i < bread_types.Count; i++)
                                         {
                                             text += string.Join("", Enumerable.Repeat(bread_types[i], fields[i]));

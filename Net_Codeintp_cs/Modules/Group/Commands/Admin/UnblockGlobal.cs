@@ -92,7 +92,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Admin
                         Logger.Error("群消息发送失败！");
                         Logger.Debug($"错误信息：\n{e.Message}");
                     }
-                }      
+                }
             }
         }
     }

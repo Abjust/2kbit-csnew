@@ -56,7 +56,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
                 int random = r.Next(splashes.Count);
                 try
                 {
-                    await receiver.SendMessageAsync($"机器人版本：2kbit C# Edition: New b_23w02a\n上次更新日期：2023/8/5\n更新内容：优化了JSON的实现方法；拆分了3个大功能的各个指令，以便后续维护；实现了伪自动任务；新增定时任务功能\n---------\n{splashes[random]}");
+                    await receiver.SendMessageAsync($"机器人版本：2kbit C# Edition: New b1.2.0\n上次更新日期：2023/8/8\n更新内容：完结撒花！\n---------\n{splashes[random]}");
                 }
                 catch (Exception e)
                 {
