@@ -59,7 +59,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                             await receiver.SendMessageAsync(messageChain);
                         }
                     }
-                    else if ((int)item["ban"]! == 0 && Math.Pow(10, (double)item["ee"]!) + (double)item["e"]! >= (int)item["level"]! + 2)
+                    else if ((int)item["ban"]! == 0 && Math.Pow(10, (double)item["ee"]!) + (double)item["e"]! < (int)item["level"]! + 2)
                     {
                         MessageChain messageChain = new MessageChainBuilder()
                                 .At(receiver.Sender.Id)

@@ -56,7 +56,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
                 int random = r.Next(splashes.Count);
                 try
                 {
-                    await receiver.SendMessageAsync($"机器人版本：2kbit C# Edition: New b1.2.1\n上次更新日期：2023/8/9\n更新内容：群成员现在有权决定机器人是否应该在此群发送消息\n---------\n{splashes[random]}");
+                    await receiver.SendMessageAsync($"机器人版本：2kbit C# Edition: New b1.2.2\n上次更新日期：2023/8/10\n更新内容：修复了一部分有关木鱼的算法的问题\n---------\n{splashes[random]}");
                 }
                 catch (Exception e)
                 {

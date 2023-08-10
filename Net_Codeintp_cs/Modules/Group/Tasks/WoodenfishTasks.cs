@@ -28,20 +28,19 @@ namespace Net_Codeintp_cs.Modules.Group.Tasks
             long TimeNow = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
             JObject obj = Json.ReadFile("woodenfish");
             JObject p = (JObject)obj["players"]!.Where(x => x.SelectToken("playerid")!.Value<string>()! == playerid).FirstOrDefault()!;
-            int cyclespeed = (int)Math.Round(60 * Math.Pow(0.95, (double)p["level"]!));
-            if ((int)p["ban"]! == 0 && TimeNow - (long)p["time"]! >= Math.Ceiling((double)cyclespeed))
+            double cyclespeed = Math.Ceiling(60 * Math.Pow(0.98, (int)p["level"]!));
+            Logger.Debug(cyclespeed);
+            if ((int)p["ban"]! == 0 && TimeNow - (long)p["time"]! >= (int)Math.Ceiling((double)cyclespeed))
             {
-                double e;
-                if (cyclespeed < 1)
+                double e = (double)p["e"]!;
+                Logger.Debug(Math.Floor((TimeNow - (long)p["time"]!) / Math.Ceiling(cyclespeed)));
+                for (int i = 0; i < Math.Floor((TimeNow - (long)p["time"]!) / Math.Ceiling(cyclespeed)); i++)
                 {
-                    e = ((double)p["e"]! * Math.Pow(Math.E, (double)p["nirvana"]!) + (int)p["level"]!) * (1 / cyclespeed);
+                    e = (e * Math.Pow(Math.E, (double)p["nirvana"]!)) + Math.Log10((int)p["level"]!);
                 }
-                else
-                {
-                    e = (double)p["e"]! * Math.Pow(Math.E, (double)p["nirvana"]!) + (int)p["level"]!;
-                }
+                Logger.Debug(e);
                 Json.ModifyObjectFromArray("woodenfish", "players", "playerid", playerid, "e", e);
-                Json.ModifyObjectFromArray("woodenfish", "players", "playerid", playerid, "time", TimeNow - (TimeNow % Math.Ceiling((double)cyclespeed)));
+                Json.ModifyObjectFromArray("woodenfish", "players", "playerid", playerid, "time", TimeNow - (long)((TimeNow - (long)p["time"]!) % Math.Ceiling(cyclespeed)));
             }
         }
     }

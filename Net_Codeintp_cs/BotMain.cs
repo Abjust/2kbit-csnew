@@ -200,7 +200,7 @@ namespace Net_Codeintp_cs
                 else
                 {
                     // 拒绝邀请
-                    await RequestManager.HandleNewInvitationRequestedAsync(e, NewInvitationRequestHandlers.Reject, "");
+                    await RequestManager.HandleNewInvitationRequestedAsync(e, NewInvitationRequestHandlers.Reject, "你不是机器人主人");
                     Logger.Info("机器人已拒绝加入 " + e.GroupId);
                 }
             });

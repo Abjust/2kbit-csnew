@@ -133,7 +133,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
 账号状态：{status}
 木鱼等级：{(int)item["level"]!}
 涅槃值：{(double)item["nirvana"]!}
-当前速度：{(int)Math.Round(60 * Math.Pow(0.95, (int)item["level"]!))} 秒/周期
+当前速度：{(int)Math.Ceiling(60 * Math.Pow(0.98, (int)item["level"]!))} 秒/周期
 当前功德：{gongde}
 {word}")
                                 .Build();

@@ -41,9 +41,10 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                 }
                 if (!Json.ObjectExistsInArray("woodenfish", "players", "playerid", receiver.Sender.Id))
                 {
+                    long TimeNow = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
                     JObject obj = new(
                         new JProperty("playerid", receiver.Sender.Id),
-                        new JProperty("time", 946656000),
+                        new JProperty("time", TimeNow),
                         new JProperty("level", 0),
                         new JProperty("gongde", 0),
                         new JProperty("e", 0),
