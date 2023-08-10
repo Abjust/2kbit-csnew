@@ -45,7 +45,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                     JObject obj = new(
                         new JProperty("playerid", receiver.Sender.Id),
                         new JProperty("time", TimeNow),
-                        new JProperty("level", 0),
+                        new JProperty("level", 1),
                         new JProperty("gongde", 0),
                         new JProperty("e", 0),
                         new JProperty("ee", 0),
