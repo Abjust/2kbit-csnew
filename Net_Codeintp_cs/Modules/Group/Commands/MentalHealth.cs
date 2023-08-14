@@ -140,7 +140,7 @@ SAS（焦虑）
             }
             foreach (string scale in scales)
             {
-                if (s == scale)
+                if (s.ToUpper() == scale)
                 {
                     try
                     {

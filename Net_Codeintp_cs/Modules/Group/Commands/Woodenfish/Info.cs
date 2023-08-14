@@ -37,6 +37,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                 string word = "";
                 if (Json.FileExists("woodenfish") && Json.ObjectExistsInArray("woodenfish", "players", "playerid", receiver.Sender.Id))
                 {
+                    WoodenfishTasks.GetExp(receiver.Sender.Id);
                     JObject obj = Json.ReadFile("woodenfish");
                     JObject item = (JObject)obj["players"]!.Where(x => x.SelectToken("playerid")!.Value<string>()! == receiver.Sender.Id).FirstOrDefault()!;
                     if ((long)item["info_ctrl"]! < new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds())
@@ -46,13 +47,12 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                             case 0:
                                 status = "正常";
                                 word = "【敲电子木鱼，见机甲佛祖，取赛博真经】";
-                                WoodenfishTasks.GetExp(receiver.Sender.Id);
                                 if (Math.Log10((int)item["gongde"]!) >= 1 && (double)item["e"]! <= 200)
                                 {
                                     Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "e", Math.Log10(Math.Pow(10, (double)item["e"]!) + (long)item["gongde"]!));
                                     Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "gongde", 0);
                                 }
-                                if (Math.Log10((double)item["e"]!) >= 1)
+                                if (Math.Log10((double)item["e"]!) >= 1 && (double)item["ee"]! <= 200)
                                 {
                                     Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "ee", Math.Log10(Math.Pow(10, (double)item["ee"]!) + (double)item["e"]!));
                                     Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "e", 0);

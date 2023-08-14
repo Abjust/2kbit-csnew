@@ -39,7 +39,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                     if ((int)item["ban"]! == 0 && (double)item["ee"]! >= 10 * (double)item["nirvana"]!)
                     {
                         Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "nirvana", (double)item["nirvana"]! + 0.05);
-                        Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "level", 0);
+                        Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "level", 1);
                         Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "ee", 0);
                         Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "e", 0);
                         Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "gongde", 0);
@@ -57,7 +57,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                                 .Build();
                         await receiver.SendMessageAsync(messageChain);
                     }
-                    else
+                    else if ((int)item["ban"]! != 0)
                     {
                         MessageChain messageChain = new MessageChainBuilder()
                                 .At(receiver.Sender.Id)

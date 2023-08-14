@@ -53,7 +53,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                                 .Build();
                         await receiver.SendMessageAsync(messageChain);
                     }
-                    else
+                    else if ((int)item["ban"]! != 0)
                     {
                         MessageChain messageChain = new MessageChainBuilder()
                                 .At(receiver.Sender.Id)

@@ -33,9 +33,10 @@ namespace Net_Codeintp_cs.Modules.Group.Tasks
             if ((int)p["ban"]! == 0 && TimeNow - (long)p["time"]! >= (int)Math.Ceiling((double)cyclespeed))
             {
                 double e = (double)p["e"]!;
-                for (int i = 0; i < Math.Floor((TimeNow - (long)p["time"]!) / Math.Ceiling(cyclespeed)); i++)
+                int cycles = Math.Min(12 + (int)Math.Floor(((double)p["nirvana"]! - 1) / 0.05), (int)Math.Floor((TimeNow - (long)p["time"]!) / Math.Ceiling(cyclespeed)));
+                for (int i = 0; i < cycles; i++)
                 {
-                    e = (e * Math.Pow(Math.E, (double)p["nirvana"]!)) + Math.Log10((int)p["level"]!);
+                    e = (e * Math.Pow(Math.Sqrt(Math.E), (double)p["nirvana"]!)) + Math.Log10((int)p["level"]!);
                 }
                 Json.ModifyObjectFromArray("woodenfish", "players", "playerid", playerid, "e", e);
                 Json.ModifyObjectFromArray("woodenfish", "players", "playerid", playerid, "time", TimeNow - (long)((TimeNow - (long)p["time"]!) % Math.Ceiling(cyclespeed)));
