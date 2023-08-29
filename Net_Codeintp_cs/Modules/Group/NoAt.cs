@@ -9,30 +9,28 @@
 // 您应该已经收到了一份GNU Affero通用公共许可证的副本。 如果没有，请参见<https://www.gnu.org/licenses/>。
 
 /**
- * 2kbit C# Edition: New
- * 测试模块
+* 2kbit C# Edition: New
+* 反at机制
 **/
 
 using Mirai.Net.Data.Messages;
 using Mirai.Net.Data.Messages.Receivers;
 using Mirai.Net.Modules;
 using Mirai.Net.Utils.Scaffolds;
-using Net_Codeintp_cs.Modules.Utils;
 
-namespace Net_Codeintp_cs.Modules.Group.Commands
+namespace Net_Codeintp_cs.Modules.Group
 {
-    public class HelloWorld : IModule
+    internal class NoAt : IModule
     {
         public bool? IsEnable { get; set; }
 
-        public async void Execute(MessageReceiverBase @base)
+        public void Execute(MessageReceiverBase @base)
         {
             GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
-            switch (receiver.MessageChain.GetPlainMessage())
+            string[] s = receiver.MessageChain.MiraiCode.Trim().Split(" ");
+            if (s.Length >= 2 && s[0] == $"[mirai:at:{BotMain.BotQQ}]")
             {
-                case "!test":
-                    await TrySend.Quote(receiver, "Hello World!");
-                    break;
+                Zuan.Execute(receiver.GroupId, receiver.Sender.Id);
             }
         }
     }

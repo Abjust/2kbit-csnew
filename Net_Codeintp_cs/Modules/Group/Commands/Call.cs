@@ -32,8 +32,9 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
             GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
             string[] s = receiver.MessageChain.MiraiCode.TrimEnd().Split(" ");
             string person;
-            if (s[0] == "!call" && (last_call == null || DateTimeOffset.UtcNow.ToUnixTimeSeconds() - last_call >= call_cd))
+            if (s[0] == "!call" && (last_call is null || DateTimeOffset.UtcNow.ToUnixTimeSeconds() - last_call >= call_cd))
             {
+                bool error = false;
                 if (s.Length >= 2)
                 {
                     if (s[1].Contains("[mirai:at:"))
@@ -59,16 +60,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
                                 }
                                 else if (number < 1)
                                 {
-                                    Logger.Warning($"未尝试执行叫人请求，因为提供的参数有误！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                                    try
-                                    {
-                                        await receiver.SendMessageAsync("参数错误");
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        Logger.Error("群消息发送失败！");
-                                        Logger.Debug($"错误信息：\n{e.Message}");
-                                    }
+                                    error = true;
                                     break;
                                 }
                                 Logger.Info($"已尝试执行叫人请求！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
@@ -82,6 +74,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
                                     {
                                         Logger.Error("群消息发送失败！");
                                         Logger.Debug($"错误信息：\n{e.Message}");
+                                        break;
                                     }
                                     Thread.Sleep(333);
                                 }
@@ -89,16 +82,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
                             }
                             else
                             {
-                                Logger.Warning($"未尝试执行叫人请求，因为提供的参数有误！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                                try
-                                {
-                                    await receiver.SendMessageAsync("参数错误");
-                                }
-                                catch (Exception e)
-                                {
-                                    Logger.Error("群消息发送失败！");
-                                    Logger.Debug($"错误信息：\n{e.Message}");
-                                }
+                                error = true;
                             }
                             break;
                         case 2:
@@ -119,45 +103,24 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
                             last_call = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
                             break;
                         default:
-                            Logger.Warning($"未尝试执行叫人请求，因为提供的参数有误！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                            try
-                            {
-                                await receiver.SendMessageAsync("参数错误");
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("群消息发送失败！");
-                                Logger.Debug($"错误信息：\n{e.Message}");
-                            }
+                            error = true;
                             break;
                     }
                 }
                 else if (s[0] == "!call")
                 {
+                    error = true;
+                }
+                if (error)
+                {
                     Logger.Warning($"未尝试执行叫人请求，因为提供的参数有误！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                    try
-                    {
-                        await receiver.SendMessageAsync("参数错误");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, "参数错误");
                 }
             }
             else if (s[0] == "!call")
             {
                 Logger.Warning($"未尝试执行叫人请求，因为CD时间未到！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                try
-                {
-                    await receiver.SendMessageAsync($"CD未到，请别急！CD还剩： {call_cd - (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - last_call)} 秒");
-                }
-                catch (Exception e)
-                {
-                    Logger.Error("群消息发送失败！");
-                    Logger.Debug($"错误信息：\n{e.Message}");
-                }
+                await TrySend.Quote(receiver, $"CD未到，请别急！CD还剩： {call_cd - (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - last_call)} 秒");
             }
         }
     }

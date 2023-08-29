@@ -13,6 +13,7 @@
 * 木鱼模块：给我木鱼
 **/
 
+using Microsoft.International.Converters.TraditionalChineseToSimplifiedConverter;
 using Mirai.Net.Data.Messages;
 using Mirai.Net.Data.Messages.Receivers;
 using Mirai.Net.Modules;
@@ -30,7 +31,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
         {
             GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
             string s = receiver.MessageChain.GetPlainMessage();
-            if (s == "给我木鱼")
+            if (ChineseConverter.Convert(s, ChineseConversionDirection.TraditionalToSimplified) == "给我木鱼")
             {
                 if (!Json.FileExists("woodenfish"))
                 {
@@ -61,28 +62,12 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                         );
                     Json.AddObjectToArray("woodenfish", "players", obj);
                     Logger.Info($"已为“{receiver.Sender.Name} ({receiver.Sender.Id})”注册木鱼账号！");
-                    try
-                    {
-                        await receiver.SendMessageAsync("注册成功辣！");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, "注册成功辣！");
                 }
                 else
                 {
                     Logger.Warning($"未尝试为“{receiver.Sender.Name} ({receiver.Sender.Id})”注册木鱼账号，因为此人已经注册过了！");
-                    try
-                    {
-                        await receiver.SendMessageAsync("宁踏马不是注册过了吗？");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, "宁踏马不是注册过了吗？");
                 }
             }
         }

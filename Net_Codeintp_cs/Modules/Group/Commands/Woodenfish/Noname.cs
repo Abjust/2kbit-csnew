@@ -9,8 +9,8 @@
 // 您应该已经收到了一份GNU Affero通用公共许可证的副本。 如果没有，请参见<https://www.gnu.org/licenses/>。
 
 /**
- * 2kbit C# Edition: New
- * 选择权模块：重新加入项目
+* 2kbit C# Edition: New
+* 木鱼模块：撅佛祖
 **/
 
 using Mirai.Net.Data.Messages;
@@ -19,9 +19,9 @@ using Mirai.Net.Modules;
 using Mirai.Net.Utils.Scaffolds;
 using Net_Codeintp_cs.Modules.Utils;
 
-namespace Net_Codeintp_cs.Modules.Group.Commands.Choice
+namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
 {
-    internal class OptIn : IModule
+    internal class Noname : IModule
     {
         public bool? IsEnable { get; set; }
 
@@ -29,26 +29,16 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Choice
         {
             GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
             string s = receiver.MessageChain.GetPlainMessage();
-            if (s == "!optin")
+            if (s == "撅佛祖")
             {
-                if (Permission.IsGroupAdmin(receiver.GroupId, receiver.Sender.Id))
+                if (Json.FileExists("woodenfish") && Json.ObjectExistsInArray("woodenfish", "players", "playerid", receiver.Sender.Id))
                 {
-                    if (Json.ObjectExistsInArray("optedout", "groups", "groupid", receiver.GroupId))
-                    {
-                        Logger.Info($"已令“{receiver.GroupName} ({receiver.GroupId})”重新加入 2kbit Beta 项目！");
-                        Json.DeleteObjectFromArray("optedout", "groups", "groupid", receiver.GroupId);
-                        Update.Do();
-                        await TrySend.Quote(receiver, "已重新加入 2kbit Beta 项目（此群将开始收到此机器人的消息）");
-                    }
-                    else
-                    {
-                        Logger.Warning($"未尝试令“{receiver.GroupName} ({receiver.GroupId})”重新加入 2kbit Beta 项目，因为此群已经加入了！");
-                        await TrySend.Quote(receiver, "无法重新加入 2kbit Beta 项目：此群已经加入");
-                    }
+                    Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "ban", 1);
+                    await TrySend.Quote(receiver, "敢撅佛祖？罪不可赦（恼）（你被永久封禁）");
                 }
                 else
                 {
-                    Logger.Warning($"未尝试令“{receiver.GroupName} ({receiver.GroupId})”重新加入 2kbit Beta 项目，因为执行者权限不足！");
+                    await TrySend.Quote(receiver, "宁踏马害没注册？快发送“给我木鱼”注册罢！");
                 }
             }
         }

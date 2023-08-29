@@ -8,16 +8,13 @@
 
 // 您应该已经收到了一份GNU Affero通用公共许可证的副本。 如果没有，请参见<https://www.gnu.org/licenses/>。
 
-
-
-using Net_Codeintp_cs.Modules.Utils;
-
-
-using Newtonsoft.Json.Linq;
 /**
  * 2kbit C# Edition: New
  * 面包厂面包生产伪自动任务
 **/
+
+using Net_Codeintp_cs.Modules.Utils;
+using Newtonsoft.Json.Linq;
 
 namespace Net_Codeintp_cs.Modules.Group.Tasks
 {
@@ -41,37 +38,35 @@ namespace Net_Codeintp_cs.Modules.Group.Tasks
                 int cycle = 300 - 20 * ((int)g["factory_level"]! - 1) - 10 * (int)g["speed_level"]!;
                 int maxstorage = 64 * (int)(Math.Pow(4, (int)g["factory_level"]! - 1) * Math.Pow(2, (int)g["storage_level"]!));
                 bool isfull = maxstorage <= (int)g["breads"]!;
+                int isdiverse = (string)g["factory_mode"]! == "diverse" ? 1 : 0;
                 if ((int)Math.Floor((double)(TimeNow - (long)g["last_produce"]!) / cycle) >= 1 && !isfull)
                 {
                     int breads = (int)g["breads"]!;
                     int output = (int)Math.Pow(4, (int)g["factory_level"]!) * (int)Math.Pow(2, (int)g["output_level"]!);
                     compare.Add(output);
-                    int maxoutput = Math.Min((int)Math.Floor((double)compare[0] / 5), (int)Math.Floor((double)compare[1] / 2));
-                    maxoutput = Math.Min((int)Math.Floor((double)maxoutput), (int)Math.Floor((double)compare[2]));
-                    maxoutput = Math.Min((int)Math.Floor((double)maxoutput), (int)Math.Floor((double)compare[3]));
+                    Logger.Debug($"Output: {output}");
+                    int maxoutput;
                     for (int i = 0; i < (int)Math.Floor((double)(TimeNow - (long)g["last_produce"]!) / cycle); i++)
                     {
+                        maxoutput = Math.Min(maxstorage - breads, (int)Math.Floor((double)compare[0] / 5 / (int)Math.Pow(4, isdiverse)));
+                        maxoutput = Math.Min((int)Math.Floor((double)maxoutput), (int)Math.Floor((double)compare[1] / 2 / (int)Math.Pow(4, isdiverse)));
+                        maxoutput = Math.Min((int)Math.Floor((double)maxoutput), (int)Math.Floor((double)compare[2] / (int)Math.Pow(4, isdiverse)));
+                        maxoutput = Math.Min((int)Math.Floor((double)maxoutput), (int)Math.Floor((double)compare[3]));
                         Random random = new();
-                        int randint = random.Next(maxoutput);
+                        int randint = random.Next(maxoutput + 1);
+                        int produced = 0;
                         if (breads + randint >= maxstorage)
                         {
-                            breads += maxstorage - breads;
-                            compare[0] -= (maxstorage - breads) * 5;
-                            compare[1] -= (maxstorage - breads) * 2;
-                            compare[2] -= (maxstorage - breads);
-                            break;
+                            produced = maxstorage - breads;
                         }
                         else
                         {
-                            breads += randint;
-                            compare[0] -= randint * 5;
-                            compare[1] -= randint * 2;
-                            compare[2] -= randint;
-                            maxoutput = Math.Min((int)Math.Floor((double)compare[0] / 5), (int)Math.Floor((double)compare[1] / 2));
-                            maxoutput = Math.Min((int)Math.Floor((double)maxoutput), (int)Math.Floor((double)compare[2]));
-                            maxoutput = Math.Min((int)Math.Floor((double)maxoutput), (int)Math.Floor((double)compare[3]));
+                            produced = randint;
                         }
-
+                        breads += produced;
+                        compare[0] -= produced * 5 * (int)Math.Pow(4, isdiverse);
+                        compare[1] -= produced * 2 * (int)Math.Pow(4, isdiverse);
+                        compare[2] -= produced * (int)Math.Pow(4, isdiverse);
                     }
                     long last_produce = (long)g["last_produce"]! + ((int)Math.Floor((double)(TimeNow - (long)g["last_produce"]!) / cycle) * cycle);
                     Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", group, "last_produce", TimeNow - (TimeNow % last_produce));

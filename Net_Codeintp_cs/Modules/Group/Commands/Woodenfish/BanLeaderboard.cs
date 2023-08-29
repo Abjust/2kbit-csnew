@@ -36,14 +36,21 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                 {
                     JArray ar = (JArray)Json.ReadFile("woodenfish")["players"]!;
                     ar = Json.Sort(ar, "total_ban", true);
+                    List<string> listed = new();
+                    int limit = 10;
                     MessageChain messageChain = new MessageChainBuilder()
                             .At(receiver.Sender.Id)
                             .Plain("\n封禁榜\n赛博账号 --- 累计封禁次数")
                             .Build();
                     foreach (JObject obj in ar.Cast<JObject>())
                     {
+                        if (listed.Count >= limit)
+                        {
+                            break;
+                        }
                         if ((int)obj["total_ban"]! >= 1)
                         {
+                            listed.Add((string)obj["playerid"]!);
                             MessageChain messageChain1 = new MessageChainBuilder()
                                     .Plain($"\n{obj["playerid"]!} --- {obj["total_ban"]!}")
                                     .Build();
@@ -55,7 +62,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                     }
                     try
                     {
-                        await receiver.SendMessageAsync(messageChain);
+                        await receiver.QuoteMessageAsync(messageChain);
                     }
                     catch (Exception e)
                     {
@@ -65,15 +72,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                 }
                 else
                 {
-                    try
-                    {
-                        await receiver.SendMessageAsync("目前还没有人注册赛博账号！");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, "目前还没有人注册赛博账号！");
                 }
             }
         }

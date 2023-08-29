@@ -51,7 +51,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Admin
                     case "ops":
                         Permission.OpsGlobal = new();
                         Permission.Ops = new();
-                        if ((JArray)obj["global"]!["list"]! != null)
+                        if ((JArray)obj["global"]!["list"]! is not null)
                         {
                             foreach (JObject item2 in ((JArray)obj["global"]!["list"]!).Cast<JObject>())
                             {
@@ -75,7 +75,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Admin
                     case "blocklist":
                         Permission.BlocklistGlobal = new();
                         Permission.Blocklist = new();
-                        if ((JArray)obj["global"]!["list"]! != null)
+                        if ((JArray)obj["global"]!["list"]! is not null)
                         {
                             foreach (JObject item2 in ((JArray)obj["global"]!["list"]!).Cast<JObject>())
                             {
@@ -99,7 +99,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Admin
                     case "ignores":
                         Permission.IgnoresGlobal = new();
                         Permission.Ignores = new();
-                        if ((JArray)obj["global"]!["list"]! != null)
+                        if ((JArray)obj["global"]!["list"]! is not null)
                         {
                             foreach (JObject item2 in ((JArray)obj["global"]!["list"]!).Cast<JObject>())
                             {

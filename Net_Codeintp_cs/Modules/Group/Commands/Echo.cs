@@ -60,15 +60,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
             else if (receiver.MessageChain.GetPlainMessage().StartsWith("!echo"))
             {
                 Logger.Warning($"未尝试复述文本，因为提供的参数有误！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                try
-                {
-                    await receiver.SendMessageAsync("参数错误");
-                }
-                catch (Exception e)
-                {
-                    Logger.Error("群消息发送失败！");
-                    Logger.Debug($"\n错误信息：\n{e.Message}");
-                }
+                await TrySend.Quote(receiver, "参数错误");
             }
         }
     }

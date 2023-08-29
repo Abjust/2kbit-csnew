@@ -10,7 +10,7 @@
 
 /**
 * 2kbit C# Edition: New
-* 面包厂模块：升级库存等级
+* 面包厂模块：设置保质期
 **/
 
 using Mirai.Net.Data.Messages;
@@ -22,7 +22,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Net_Codeintp_cs.Modules.Group.Commands.Bread
 {
-    internal class UpgradeStorage : IModule
+    internal class SetExpiry : IModule
     {
         public bool? IsEnable { get; set; }
 
@@ -30,45 +30,47 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Bread
         {
             GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
             string[] s = receiver.MessageChain.GetPlainMessage().Split(" ");
-            if (s[0] == "!upgrade_storage")
+            if (s[0] == "!set_expiry")
             {
                 if (Json.FileExists("breadfactory") && Json.FileExists("materials") && Json.ObjectExistsInArray("breadfactory", "groups", "groupid", receiver.GroupId))
                 {
                     JObject obj = Json.ReadFile("breadfactory");
                     JObject item = (JObject)obj["groups"]!.Where(x => x.SelectToken("groupid")!.Value<string>()! == receiver.GroupId).FirstOrDefault()!;
-                    if ((int)item["factory_level"]! == Query.breadfactory_maxlevel)
+                    if (s.Length == 2 && int.TryParse(s[1], out int expiry) && expiry != (int)item["expiration"]!)
                     {
-                        if ((int)item["storage_level"]! != 16)
+                        if (expiry == 0 || ((expiry >= 1) && (expiry <= 30)))
                         {
-                            int formula = (int)Math.Ceiling(2000 * Math.Pow(1.28, (int)item["storage_level"]!));
-                            if ((int)item["factory_exp"]! >= formula)
+                            long TimeNow = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+                            Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", receiver.GroupId, "expiration", expiry);
+                            Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", receiver.GroupId, "breads", 0);
+                            Json.ModifyObjectFromArray("materials", "groups", "groupid", receiver.GroupId, "flour", 0);
+                            Json.ModifyObjectFromArray("materials", "groups", "groupid", receiver.GroupId, "egg", 0);
+                            Json.ModifyObjectFromArray("materials", "groups", "groupid", receiver.GroupId, "yeast", 0);
+                            if (expiry == 0)
                             {
-                                Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", receiver.GroupId, "storage_level", (int)item["storage_level"]! + 1);
-                                Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", receiver.GroupId, "factory_exp", (int)item["factory_exp"]! - formula);
-                                Logger.Warning($"已升级“{receiver.GroupName} ({receiver.GroupId})”的库存等级！");
-                                await TrySend.Quote(receiver, $"已将面包厂库存等级升级到 {(int)item["storage_level"]! + 1} 级");
+                                await TrySend.Quote(receiver, "已将面包厂保质期设置为：永不过期\n（本批次库存已自动清空）");
                             }
                             else
                             {
-                                Logger.Warning($"未尝试升级“{receiver.GroupName} ({receiver.GroupId})”的库存等级，因为该分厂积累的经验值不够！");
-                                await TrySend.Quote(receiver, $"升级库存等级需要 {formula} 点经验，但是本群面包厂还差 {formula - (int)item["factory_exp"]!} 点经验");
+                                Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", receiver.GroupId, "last_produce", TimeNow);
+                                Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", receiver.GroupId, "next_expiry", TimeNow + expiry * 86400);
+                                Json.ModifyObjectFromArray("materials", "groups", "groupid", receiver.GroupId, "last_produce", TimeNow);
+                                Json.ModifyObjectFromArray("materials", "groups", "groupid", receiver.GroupId, "next_expiry", TimeNow + expiry * 86400);
+                                await TrySend.Quote(receiver, $"已将面包厂保质期设置为：{expiry} 天\n（本批次库存已自动清空）");
                             }
                         }
                         else
                         {
-                            Logger.Warning($"未尝试升级“{receiver.GroupName} ({receiver.GroupId})”的库存等级，因为该分厂的库存等级已经满级！");
-                            await TrySend.Quote(receiver, "本群面包厂库存等级已经满级了！");
+                            await TrySend.Quote(receiver, "保质期只能介于1~30天，也可设置为0（永不过期）");
                         }
                     }
                     else
                     {
-                        Logger.Warning($"未尝试升级“{receiver.GroupName} ({receiver.GroupId})”的库存等级，因为该分厂尚未满级！");
-                        await TrySend.Quote(receiver, "这b群，面包厂踏马还没满级（恼）");
+                        await TrySend.Quote(receiver, "捏吗，参数有问题让我怎么执行？（恼）（注意：新设置的过期时间不能和现在的一样）");
                     }
                 }
                 else
                 {
-                    Logger.Warning($"未尝试升级“{receiver.GroupName} ({receiver.GroupId})”的库存等级，因为该地区尚未兴建面包厂！");
                     await TrySend.Quote(receiver, "这b群，踏马连个面包厂都没有（恼）");
                 }
             }

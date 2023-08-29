@@ -36,30 +36,18 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                 {
                     JObject obj = Json.ReadFile("woodenfish");
                     JObject item = (JObject)obj["players"]!.Where(x => x.SelectToken("playerid")!.Value<string>()! == receiver.Sender.Id).FirstOrDefault()!;
-                    if ((int)item["ban"]! == 0 && Math.Pow(10, (double)item["e"]!) >= 100)
+                    if ((int)item["ban"]! == 0 && Math.Pow(10, (int)item["gongde"]!) >= 100)
                     {
-                        MessageChain messageChain = new MessageChainBuilder()
-                                .At(receiver.Sender.Id)
-                                .Plain(" 哈*100")
-                                .Build();
-                        await receiver.SendMessageAsync(messageChain);
-                        Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "e", Math.Log10(Math.Pow(10, (double)item["e"]!) - 100));
+                        await TrySend.Quote(receiver, "哈*100"); ;
+                        Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "gongde", (int)item["gongde"]! - 100);
                     }
                     else if ((int)item["ban"]! == 0 && Math.Pow(10, (double)item["e"]!) < 100)
                     {
-                        MessageChain messageChain = new MessageChainBuilder()
-                                .At(receiver.Sender.Id)
-                                .Plain(" 宁踏马功德不够，笑个毛啊（恼）")
-                                .Build();
-                        await receiver.SendMessageAsync(messageChain);
+                        await TrySend.Quote(receiver, "宁踏马功德不够，笑个毛啊（恼");
                     }
                     else if ((int)item["ban"]! != 0)
                     {
-                        MessageChain messageChain = new MessageChainBuilder()
-                                .At(receiver.Sender.Id)
-                                .Plain(" 宁踏马被佛祖封号辣（恼）")
-                                .Build();
-                        await receiver.SendMessageAsync(messageChain);
+                        await TrySend.Quote(receiver, "宁踏马被佛祖封号辣（恼）");
                     }
                 }
             }

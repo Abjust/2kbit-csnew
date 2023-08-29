@@ -24,9 +24,6 @@ namespace Net_Codeintp_cs.Modules.Utils
         public static List<string>? Ignores { get; set; }
         public static List<string>? IgnoresGlobal { get; set; }
         public static List<string>? OptedOut { get; set; }
-        public const int None = 0;
-        public const int GroupAdmin = 1;
-        public const int GlobalAdmin = 2;
         public static bool IsGlobalAdmin(string qq)
         {
             return OpsGlobal!.Contains(qq);

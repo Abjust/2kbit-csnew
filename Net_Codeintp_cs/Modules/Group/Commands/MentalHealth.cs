@@ -75,8 +75,8 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
                 {
                     "https://www.jungus.cn/zh-hans/test/",
                     "7-15：https://www.psy525.cn/ceshi/84336.html\r\n16+：https://www.psy525.cn/ceshi/84335.html",
-                    "http://www.apesk.com/bigfive/",
                     "https://www.apesk.com/bigfive_step2/",
+                    "https://types.yuzeli.com/survey/nine180/",
                     "https://qst.darkfactor.org",
                     "https://unnamed42.github.io/2016-06-30-%E5%AE%98%E6%96%B9%E7%89%88DnD%E9%98%B5%E8%90%A5%E6%B5%8B%E8%AF%95.html",
                     "http://www.ntneuro.org/scale/scl90.asp",
@@ -87,10 +87,9 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
             string s = receiver.MessageChain.GetPlainMessage();
             if (s == "精神疾病科普大全")
             {
-                try
-                {
-                    await receiver.SendMessageAsync(
-                    @"精神疾病科普大全：
+                await TrySend.Quote(receiver,
+                    @"
+精神疾病科普大全：
 1.神经症类
 焦虑症|强迫症
 神经衰弱|恐惧症
@@ -103,32 +102,19 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
 厌食症|贪食症
 5.神经发育障碍
 孤独症|多动症");
-                }
-                catch (Exception e)
-                {
-                    Logger.Error("群消息发送失败！");
-                    Logger.Debug($"错误信息：\n{e.Message}");
-                }
             }
             foreach (string disorder in disorders)
             {
                 if (s == disorder)
                 {
-                    try
-                    {
-                        await receiver.SendMessageAsync(explanations[disorders.IndexOf(disorder)]);
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, explanations[disorders.IndexOf(disorder)]);
                 }
             }
             if (s == "量表测试大全")
             {
-                await receiver.SendMessageAsync(
-                        @"量表测试大全
+                await TrySend.Quote(receiver,
+                        @"
+量表测试大全
 人格/性格测试：
 MBTI|艾森克
 大五|九型
@@ -142,15 +128,7 @@ SAS（焦虑）
             {
                 if (s.ToUpper() == scale)
                 {
-                    try
-                    {
-                        await receiver.SendMessageAsync(links[scales.IndexOf(scale)]);
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, links[scales.IndexOf(scale)]);
                 }
             }
         }

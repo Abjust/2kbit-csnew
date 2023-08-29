@@ -10,27 +10,31 @@
 
 /**
  * 2kbit C# Edition: New
- * 保留模块（功能未实现）
+ * 群消息发送工具模块
 **/
 
-using Mirai.Net.Sessions.Http.Managers;
-using Net_Codeintp_cs.Modules.Utils;
+using Mirai.Net.Data.Messages;
+using Mirai.Net.Data.Messages.Receivers;
+using Mirai.Net.Utils.Scaffolds;
 
-namespace Net_Codeintp_cs.Modules
+namespace Net_Codeintp_cs.Modules.Utils
 {
-    internal class NotImplemented
+    internal class TrySend
     {
-        public static async void Do(string group, string command)
+        public static async Task Quote(GroupMessageReceiver receiver, string content)
         {
-            Logger.Warning($"指令“{command}”尚未实现，无法执行！");
             try
             {
-                await MessageManager.SendGroupMessageAsync(group, $"指令“{command}”的功能已在计划内，但是尚未实现！");
+                MessageChain messageChain = new MessageChainBuilder()
+                                                .At(receiver.Sender.Id)
+                                                .Plain($" {content}")
+                                                .Build();
+                await receiver.QuoteMessageAsync(messageChain);
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
                 Logger.Error("群消息发送失败！");
-                Logger.Debug($"\n{ex.Message}");
+                Logger.Debug($"错误信息：\n{e.Message}");
             }
         }
     }

@@ -46,70 +46,30 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Bread
                                 Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", receiver.GroupId, "output_level", (int)item["output_level"]! + 1);
                                 Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", receiver.GroupId, "factory_exp", (int)item["factory_exp"]! - formula);
                                 Logger.Warning($"已升级“{receiver.GroupName} ({receiver.GroupId})”的产量等级！");
-                                try
-                                {
-                                    await receiver.SendMessageAsync($"已将面包厂产量等级升级到 {(int)item["output_level"]! + 1} 级");
-                                }
-                                catch (Exception e)
-                                {
-                                    Logger.Error("群消息发送失败！");
-                                    Logger.Debug($"错误信息：\n{e.Message}");
-                                }
+                                await TrySend.Quote(receiver, $"已将面包厂产量等级升级到 {(int)item["output_level"]! + 1} 级");
                             }
                             else
                             {
                                 Logger.Warning($"未尝试升级“{receiver.GroupName} ({receiver.GroupId})”的产量等级，因为该分厂积累的经验值不够！");
-                                try
-                                {
-                                    await receiver.SendMessageAsync($"升级产量等级需要 {formula} 点经验，但是本群面包厂还差 {formula - (int)item["factory_exp"]!} 点经验");
-                                }
-                                catch (Exception e)
-                                {
-                                    Logger.Error("群消息发送失败！");
-                                    Logger.Debug($"错误信息：\n{e.Message}");
-                                }
+                                await TrySend.Quote(receiver, $"升级产量等级需要 {formula} 点经验，但是本群面包厂还差 {formula - (int)item["factory_exp"]!} 点经验");
                             }
                         }
                         else
                         {
                             Logger.Warning($"未尝试升级“{receiver.GroupName} ({receiver.GroupId})”的产量等级，因为该分厂的产量等级已经满级！");
-                            try
-                            {
-                                await receiver.SendMessageAsync("本群面包厂产量等级已经满级了！");
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("群消息发送失败！");
-                                Logger.Debug($"错误信息：\n{e.Message}");
-                            }
+                            await TrySend.Quote(receiver, "本群面包厂产量等级已经满级了！");
                         }
                     }
                     else
                     {
                         Logger.Warning($"未尝试升级“{receiver.GroupName} ({receiver.GroupId})”的产量等级，因为该分厂尚未满级！");
-                        try
-                        {
-                            await receiver.SendMessageAsync("本群面包厂还没有满级！");
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.Error("群消息发送失败！");
-                            Logger.Debug($"错误信息：\n{e.Message}");
-                        }
+                        await TrySend.Quote(receiver, "这b群，面包厂踏马还没满级（恼）");
                     }
                 }
                 else
                 {
                     Logger.Warning($"未尝试升级“{receiver.GroupName} ({receiver.GroupId})”的产量等级，因为该地区尚未兴建面包厂！");
-                    try
-                    {
-                        await receiver.SendMessageAsync("本群还没有面包厂！");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, "这b群，踏马连个面包厂都没有（恼）");
                 }
             }
         }

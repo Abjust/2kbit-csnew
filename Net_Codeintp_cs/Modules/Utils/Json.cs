@@ -29,10 +29,7 @@ namespace Net_Codeintp_cs.Modules.Utils
             {
                 return true;
             }
-            else
-            {
-                return false;
-            }
+            return false;
         }
         public static void CreateFile(string filename, JObject objects)
         {
@@ -56,14 +53,11 @@ namespace Net_Codeintp_cs.Modules.Utils
         {
             JObject o = ReadFile(filename);
             JArray ar = (JArray)o!.SelectToken(location)!;
-            if (ar.Children().Where(x => x.SelectToken(property)!.Value<string>()! == (string)value).FirstOrDefault()! != null)
+            if (ar.Children().Where(x => x.SelectToken(property)!.Value<string>()! == (string)value).FirstOrDefault()! is not null)
             {
                 return true;
             }
-            else
-            {
-                return false;
-            }
+            return false;
         }
         public static void AddObjectToArray(string filename, string location, JObject objects, string? index = null, object? indexvalue = null)
         {
@@ -170,8 +164,8 @@ namespace Net_Codeintp_cs.Modules.Utils
         {
             return desc switch
             {
-                true => new JArray(array.OrderByDescending(obj => (string)obj[index]!)),
-                _ => new JArray(array.OrderBy(obj => (string)obj[index]!)),
+                true => new JArray(array.OrderByDescending(obj => (double)obj[index]!)),
+                _ => new JArray(array.OrderBy(obj => (double)obj[index]!)),
             };
         }
     }

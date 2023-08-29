@@ -36,47 +36,34 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                 {
                     JObject obj = Json.ReadFile("woodenfish");
                     JObject item = (JObject)obj["players"]!.Where(x => x.SelectToken("playerid")!.Value<string>()! == receiver.Sender.Id).FirstOrDefault()!;
-                    if ((int)item["ban"]! == 0 && (double)item["ee"]! >= 10 * (double)item["nirvana"]!)
+                    if ((double)item["nirvana"]! < 5)
                     {
-                        Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "nirvana", (double)item["nirvana"]! + 0.05);
-                        Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "level", 1);
-                        Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "ee", 0);
-                        Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "e", 0);
-                        Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "gongde", 0);
-                        MessageChain messageChain = new MessageChainBuilder()
-                                .At(receiver.Sender.Id)
-                                .Plain(" 涅槃重生，功德圆满（喜）")
-                                .Build();
-                        await receiver.SendMessageAsync(messageChain);
+                        if ((int)item["ban"]! == 0 && (double)item["ee"]! >= 10 + (Math.Truncate(((double)item["nirvana"]! - 1) / 0.05) * 1.5))
+                        {
+                            Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "nirvana", Math.Truncate(((double)item["nirvana"]! + 0.05) * 100) / 100);
+                            Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "level", 1);
+                            Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "ee", 0);
+                            Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "e", 0);
+                            Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "gongde", 0);
+                            await TrySend.Quote(receiver, "涅槃重生，功德圆满（喜）");
+                        }
+                        else if ((int)item["ban"]! == 0 && (double)item["ee"]! <= 10 + (Math.Ceiling(((double)item["nirvana"]! - 1) / 0.05) * 2))
+                        {
+                            await TrySend.Quote(receiver, "宁踏马功德不够，涅槃重生个毛啊（恼）");
+                        }
+                        else if ((int)item["ban"]! != 0)
+                        {
+                            await TrySend.Quote(receiver, "宁踏马被佛祖封号辣（恼）");
+                        }
                     }
-                    else if ((int)item["ban"]! == 0 && (double)item["ee"]! < 10 * (double)item["nirvana"]!)
+                    else
                     {
-                        MessageChain messageChain = new MessageChainBuilder()
-                                .At(receiver.Sender.Id)
-                                .Plain(" 宁踏马功德不够，涅槃重生个毛啊（恼）")
-                                .Build();
-                        await receiver.SendMessageAsync(messageChain);
-                    }
-                    else if ((int)item["ban"]! != 0)
-                    {
-                        MessageChain messageChain = new MessageChainBuilder()
-                                .At(receiver.Sender.Id)
-                                .Plain(" 宁踏马被佛祖封号辣（恼）")
-                                .Build();
-                        await receiver.SendMessageAsync(messageChain);
+                        await TrySend.Quote(receiver, "宁踏马已经不能涅槃辣（恼）");
                     }
                 }
                 else
                 {
-                    try
-                    {
-                        await receiver.SendMessageAsync("宁踏马害没注册？快发送“给我木鱼”注册罢！");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, "宁踏马害没注册？快发送“给我木鱼”注册罢！");
                 }
             }
         }

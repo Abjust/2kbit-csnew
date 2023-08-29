@@ -43,57 +43,25 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Admin
                                 new JProperty("qq", Identify.Do(s[1])));
                                 Json.AddObjectToArray("ops", "global.list", o);
                                 Logger.Info($"已设置全局机器人管理员！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{Identify.Do(s[1])}");
-                                try
-                                {
-                                    await receiver.SendMessageAsync($"已将 {Identify.Do(s[1])} 设置为全局机器人管理员");
-                                }
-                                catch (Exception e)
-                                {
-                                    Logger.Error("群消息发送失败！");
-                                    Logger.Debug($"错误信息：\n{e.Message}");
-                                }
+                                await TrySend.Quote(receiver, $"已将 {Identify.Do(s[1])} 设置为全局机器人管理员");
                                 Update.Do();
                                 break;
                             default:
                                 Logger.Warning($"未尝试设置全局机器人管理员，因为被执行者已经具备此或更高权限！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{Identify.Do(s[1])}");
-                                try
-                                {
-                                    await receiver.SendMessageAsync($"无法将 {Identify.Do(s[1])} 设置为全局机器人管理员：已经有此或者更高权限");
-                                }
-                                catch (Exception e)
-                                {
-                                    Logger.Error("群消息发送失败！");
-                                    Logger.Debug($"错误信息：\n{e.Message}");
-                                }
+                                await TrySend.Quote(receiver, $"无法将 {Identify.Do(s[1])} 设置为全局机器人管理员：人家踏马已经有权限了（恼）");
                                 break;
                         }
                     }
                     else
                     {
                         Logger.Warning($"未尝试设置全局机器人管理员，因为执行者权限不足！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{Identify.Do(s[1]) ?? null}");
-                        try
-                        {
-                            await receiver.SendMessageAsync($"无法将 {Identify.Do(s[1]) ?? null} 设置为全局机器人管理员：权限不足");
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.Error("群消息发送失败！");
-                            Logger.Debug($"错误信息：\n{e.Message}");
-                        }
+                        await TrySend.Quote(receiver, $"无法将 {Identify.Do(s[1])} 设置为全局机器人管理员：宁踏马有权限吗？（恼）");
                     }
                 }
                 else
                 {
                     Logger.Warning($"未尝试设置全局机器人管理员，因为提供的参数有误！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                    try
-                    {
-                        await receiver.SendMessageAsync("参数错误");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, "捏吗，参数有问题让我怎么执行？（恼）");
                 }
             }
         }

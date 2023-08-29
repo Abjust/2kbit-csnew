@@ -41,57 +41,25 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Admin
                                 case true:
                                     Json.DeleteObjectFromArray("blocklist", "groups.list", "qq", Identify.Do(s[1]), "groupid", receiver.GroupId);
                                     Logger.Info($"已移出“{receiver.GroupName} ({receiver.GroupId})”的黑名单！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{Identify.Do(s[1])}");
-                                    try
-                                    {
-                                        await receiver.SendMessageAsync($"已将 {Identify.Do(s[1])} 从本群黑名单移出");
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        Logger.Error("群消息发送失败！");
-                                        Logger.Debug($"错误信息：\n{e.Message}");
-                                    }
+                                    await TrySend.Quote(receiver, $"已将 {Identify.Do(s[1])} 从本群黑名单移出");
                                     Update.Do();
                                     break;
                                 default:
                                     Logger.Warning($"未尝试移出“{receiver.GroupName} ({receiver.GroupId})”的黑名单，因为被执行者不在此群黑名单里！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{Identify.Do(s[1])}");
-                                    try
-                                    {
-                                        await receiver.SendMessageAsync($"无法将 {Identify.Do(s[1])} 从本群黑名单移出：被执行者不在本群黑名单里");
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        Logger.Error("群消息发送失败！");
-                                        Logger.Debug($"错误信息：\n{e.Message}");
-                                    }
+                                    await TrySend.Quote(receiver, $"无法将 {Identify.Do(s[1])} 从本群黑名单移出：人家踏马压根不在里头（恼）");
                                     break;
                             }
                             break;
                         default:
                             Logger.Warning($"未尝试移出“{receiver.GroupName} ({receiver.GroupId})”的黑名单，因为执行者权限不足！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{Identify.Do(s[1]) ?? null}");
-                            try
-                            {
-                                await receiver.SendMessageAsync($"无法将 {Identify.Do(s[1]) ?? null} 从本群黑名单移出：权限不足");
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("群消息发送失败！");
-                                Logger.Debug($"错误信息：\n{e.Message}");
-                            }
+                            await TrySend.Quote(receiver, $"无法将 {Identify.Do(s[1])} 从本群黑名单移出：宁踏马有权限吗？（恼）");
                             break;
                     }
                 }
                 else
                 {
                     Logger.Warning($"未尝试移出“{receiver.GroupName} ({receiver.GroupId})”的黑名单，因为提供的参数有误！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                    try
-                    {
-                        await receiver.SendMessageAsync("参数错误");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, "捏吗，参数有问题让我怎么执行？（恼）");
                 }
             }
         }

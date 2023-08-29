@@ -26,25 +26,32 @@ namespace Net_Codeintp_cs.Modules.Group.Tasks
             JObject obj = Json.ReadFile("breadfactory");
             JObject g = (JObject)obj["groups"]!.Where(x => x.SelectToken("groupid")!.Value<string>()! == group).FirstOrDefault()!;
             int cycle = 300 - 20 * ((int)g["factory_level"]! - 1) - 10 * (int)g["speed_level"]!;
-            int output = (int)Math.Pow(4, (int)g["factory_level"]!) * (int)Math.Pow(2, (int)g["output_level"]!);
+            int output = (int)Math.Ceiling(Math.Pow(4, (int)g["factory_level"]!) * (int)Math.Pow(2, (int)g["output_level"]!));
             int maxstorage = 64 * (int)(Math.Pow(4, (int)g["factory_level"]! - 1) * Math.Pow(2, (int)g["storage_level"]!));
+            int difference = maxstorage - (int)g["breads"]!;
             bool isfull = maxstorage <= (int)g["breads"]!;
+            int isdiverse = (string)g["factory_mode"]! == "diverse" ? 1 : 0;
             string factory_mode = (string)g["factory_mode"]!;
             obj = Json.ReadFile("materials");
             g = (JObject)obj["groups"]!.Where(x => x.SelectToken("groupid")!.Value<string>()! == group).FirstOrDefault()!;
             if (!factory_mode.Contains("infinite"))
             {
-                if ((int)Math.Floor((double)(TimeNow - (long)g["last_produce"]!) / cycle) >= 1 && !isfull)
+                if ((int)Math.Floor((double)(TimeNow - (long)g["last_produce"]!) / cycle) >= 1)
                 {
                     int flour = (int)g["flour"]!;
                     int egg = (int)g["egg"]!;
                     int yeast = (int)g["yeast"]!;
                     for (int i = 0; i < (int)Math.Floor((double)(TimeNow - (long)g["last_produce"]!) / cycle); i++)
                     {
+                        isfull = isfull || ((flour >= difference * 5 * Math.Pow(4, isdiverse)) && (egg >= difference * 2 * Math.Pow(4, isdiverse)) && (yeast >= difference * Math.Pow(4, isdiverse)));
+                        if (isfull)
+                        {
+                            continue;
+                        }
                         Random random = new();
-                        flour += random.Next(1, output * 5);
-                        egg += random.Next(1, output * 2);
-                        yeast += random.Next(1, output);
+                        flour += random.Next(1, output * 5 + 1);
+                        egg += random.Next(1, output * 2 + 1);
+                        yeast += random.Next(1, output + 1);
                     }
                     long last_produce = (long)g["last_produce"]! + ((int)Math.Floor((double)(TimeNow - (long)g["last_produce"]!) / cycle) * cycle);
                     Json.ModifyObjectFromArray("materials", "groups", "groupid", group, "last_produce", TimeNow - (TimeNow % last_produce));

@@ -30,7 +30,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Bread
         {
             GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
             string[] s = receiver.MessageChain.GetPlainMessage().Split(" ");
-            if (s[0] == "!change_mode")
+            if (s[0] == "!change_mode" && s.Length == 2)
             {
                 if (Json.FileExists("breadfactory") && Json.FileExists("materials") && Json.ObjectExistsInArray("breadfactory", "groups", "groupid", receiver.GroupId))
                 {
@@ -41,131 +41,59 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Bread
                         switch (s[1])
                         {
                             case "normal":
-                                Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", receiver.GroupId, "factory_mode", typeof(string), "normal");
+                                Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", receiver.GroupId, "factory_mode", "normal");
                                 Logger.Info($"有面包厂已将生产模式切换为：“单一化供应”！\n分厂：{receiver.GroupName} ({receiver.GroupId})");
-                                try
-                                {
-                                    await receiver.SendMessageAsync("已将本群生产模式修改为：单一化供应");
-                                }
-                                catch (Exception e)
-                                {
-                                    Logger.Error("群消息发送失败！");
-                                    Logger.Debug($"错误信息：\n{e.Message}");
-                                }
+                                await TrySend.Quote(receiver, "已将本群生产模式修改为：单一化供应");
                                 break;
                             default:
                                 Logger.Warning($"有分厂未能修改生产模式，因为当前生产模式是“无限供应”或其变体！\n分厂：{receiver.GroupName} ({receiver.GroupId})");
-                                try
-                                {
-                                    await receiver.SendMessageAsync("由于当前面包厂生产模式是“无限供应”或其变体，因此仅允许切换到“单一化供应”！");
-                                }
-                                catch (Exception e)
-                                {
-                                    Logger.Error("群消息发送失败！");
-                                    Logger.Debug($"错误信息：\n{e.Message}");
-                                }
+                                await TrySend.Quote(receiver, "宁踏马事“无限供应”，只能改成“单一化供应”（恼）");
                                 break;
                         }
                     }
                     else
                     {
-                        if ((int)item["breads"]! == 0 || ((string)item["factory_mode"]!).Contains("infinite"))
+                        if ((int)item["breads"]! == 0)
                         {
                             switch (s[1])
                             {
                                 case "infinite_diverse":
-                                    Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", receiver.GroupId, "factory_mode", typeof(string), "infinite_diverse");
+                                    Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", receiver.GroupId, "factory_mode", "infinite_diverse");
                                     Logger.Info($"有面包厂已将生产模式切换为：“多样化无限供应”！\n分厂：{receiver.GroupName} ({receiver.GroupId})");
-                                    try
-                                    {
-                                        await receiver.SendMessageAsync("已将本群生产模式修改为：多样化无限供应");
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        Logger.Error("群消息发送失败！");
-                                        Logger.Debug($"错误信息：\n{e.Message}");
-                                    }
+                                    await TrySend.Quote(receiver, "已将本群生产模式修改为：多样化无限供应");
                                     break;
                                 case "infinite":
-                                    Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", receiver.GroupId, "factory_mode", typeof(string), "infinite");
+                                    Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", receiver.GroupId, "factory_mode", "infinite");
                                     Logger.Info($"有面包厂已将生产模式切换为：“无限供应”！\n分厂：{receiver.GroupName} ({receiver.GroupId})");
-                                    try
-                                    {
-                                        await receiver.SendMessageAsync("已将本群生产模式修改为：无限供应");
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        Logger.Error("群消息发送失败！");
-                                        Logger.Debug($"错误信息：\n{e.Message}");
-                                    }
+                                    await TrySend.Quote(receiver, "已将本群生产模式修改为：无限供应");
                                     break;
                                 case "diverse":
-                                    Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", receiver.GroupId, "factory_mode", typeof(string), "diverse");
+                                    Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", receiver.GroupId, "factory_mode", "diverse");
                                     Logger.Info($"有面包厂已将生产模式切换为：“多样化供应”！\n分厂：{receiver.GroupName} ({receiver.GroupId})");
-                                    try
-                                    {
-                                        await receiver.SendMessageAsync("已将本群生产模式修改为：多样化供应");
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        Logger.Error("群消息发送失败！");
-                                        Logger.Debug($"错误信息：\n{e.Message}");
-                                    }
+                                    await TrySend.Quote(receiver, "已将本群生产模式修改为：多样化供应");
                                     break;
                                 case "normal":
-                                    Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", receiver.GroupId, "factory_mode", typeof(string), "normal");
+                                    Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", receiver.GroupId, "factory_mode", "normal");
                                     Logger.Info($"有面包厂已将生产模式切换为：“单一化供应”！\n分厂：{receiver.GroupName} ({receiver.GroupId})");
-                                    try
-                                    {
-                                        await receiver.SendMessageAsync("已将本群生产模式修改为：单一化供应");
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        Logger.Error("群消息发送失败！");
-                                        Logger.Debug($"错误信息：\n{e.Message}");
-                                    }
+                                    await TrySend.Quote(receiver, "已将本群生产模式修改为：单一化供应");
                                     break;
                                 default:
                                     Logger.Warning($"有分厂未能修改生产模式，因为提供的参数有误！\n分厂：{receiver.GroupName} ({receiver.GroupId})");
-                                    try
-                                    {
-                                        await receiver.SendMessageAsync("参数错误");
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        Logger.Error("群消息发送失败！");
-                                        Logger.Debug($"错误信息：\n{e.Message}");
-                                    }
+                                    await TrySend.Quote(receiver, "捏吗，参数有问题让我怎么执行？（恼）");
                                     break;
                             }
                         }
                         else
                         {
                             Logger.Warning($"有分厂未能修改生产模式，因为面包厂库存不是空的！\n分厂：{receiver.GroupName} ({receiver.GroupId})");
-                            try
-                            {
-                                await receiver.SendMessageAsync("切换生产模式之前，必须先清空面包厂库存！");
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("群消息发送失败！");
-                                Logger.Debug($"错误信息：\n{e.Message}");
-                            }
+                            await TrySend.Quote(receiver, "宁踏马能不能先清空下面包库存？（恼）");
                         }
                     }
                 }
                 else
                 {
                     Logger.Warning($"生产模式切换请求未能执行，因为该地区尚未兴建面包厂！\n分厂：{receiver.GroupName} ({receiver.GroupId})");
-                    try
-                    {
-                        await receiver.SendMessageAsync("本群还没有面包厂！");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, "这b群，踏马连个面包厂都没有（恼）");
                 }
             }
         }

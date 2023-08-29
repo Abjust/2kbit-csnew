@@ -37,7 +37,7 @@ namespace Net_Codeintp_cs.Modules.Utils
             ConsoleRowHighlightingRule HighlightingDebug = new()
             {
                 Condition = ConditionParser.ParseExpression("level == LogLevel.Debug"),
-                ForegroundColor = ConsoleOutputColor.DarkGray
+                ForegroundColor = ConsoleOutputColor.DarkGray,
             };
             ConsoleRowHighlightingRule HighlightingInfo = new()
             {

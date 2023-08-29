@@ -41,57 +41,25 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Admin
                             {
                                 await GroupManager.UnMuteAsync(Identify.Do(s[1]), receiver.GroupId);
                                 Logger.Info($"解禁操作已执行！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{Identify.Do(s[1])}");
-                                try
-                                {
-                                    await receiver.SendMessageAsync($"已解除对 {Identify.Do(s[1])} 的禁言");
-                                }
-                                catch (Exception e)
-                                {
-                                    Logger.Error("群消息发送失败！");
-                                    Logger.Debug($"错误信息：\n{e.Message}");
-                                }
+                                await TrySend.Quote(receiver, $"已解除对 {Identify.Do(s[1])} 的禁言");
                                 break;
                             }
                             catch (Exception ex)
                             {
                                 Logger.Error($"已尝试执行解禁操作，但是失败了！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{Identify.Do(s[1])}\n错误详细：\n{ex.Message}");
-                                try
-                                {
-                                    await receiver.SendMessageAsync($"无法解除对 {Identify.Do(s[1])} 的禁言：请检查机器人和被执行者在群内的权限，以及提供的参数是否正确");
-                                }
-                                catch (Exception e)
-                                {
-                                    Logger.Error("群消息发送失败！");
-                                    Logger.Debug($"错误信息：\n{e.Message}");
-                                }
+                                await TrySend.Quote(receiver, $"无法解除对 {Identify.Do(s[1])} 的禁言：机器人踏马的有权限？人家踏马的事群管？这让我怎么搞？（恼）");
                             }
                             break;
                         default:
                             Logger.Warning($"未尝试执行解禁操作，因为执行者权限不足！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{Identify.Do(s[1]) ?? null}");
-                            try
-                            {
-                                await receiver.SendMessageAsync($"无法解除对 {Identify.Do(s[1])} 的禁言：权限不足（如果是群主，请先尝试使用!op将自己设置成本群管理员）");
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("群消息发送失败！");
-                                Logger.Debug($"错误信息：\n{e.Message}");
-                            }
+                            await TrySend.Quote(receiver, $"无法解除对 {Identify.Do(s[1])} 的禁言：宁踏马有权限吗？（恼）（要是宁踏马的事群主，就去用!op把自己设置成本群管理员，ok？）");
                             break;
                     }
                 }
                 else
                 {
                     Logger.Warning($"未尝试执行解禁操作，因为提供的参数有误！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                    try
-                    {
-                        await receiver.SendMessageAsync("参数错误");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, "参数错误");
                 }
             }
         }

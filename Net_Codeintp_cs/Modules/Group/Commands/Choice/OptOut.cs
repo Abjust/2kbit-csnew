@@ -43,15 +43,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Choice
                             new JProperty("optedout_at", TimeNow));
                         Json.AddObjectToArray("optedout", "groups", obj);
                         Update.Do();
-                        try
-                        {
-                            await receiver.SendMessageAsync("已退出 2kbit Beta 项目（此群将不会再收到此机器人的消息）");
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.Error("群消息发送失败！");
-                            Logger.Debug($"错误信息：\n{e.Message}");
-                        }
+                        await TrySend.Quote(receiver, "已退出 2kbit Beta 项目（此群将不会再收到此机器人的消息）");
                     }
                     else
                     {
@@ -61,15 +53,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Choice
                 else
                 {
                     Logger.Warning($"未尝试令“{receiver.GroupName} ({receiver.GroupId})”退出 2kbit Beta 项目，因为执行者权限不足！");
-                    try
-                    {
-                        await receiver.SendMessageAsync("无法退出 2kbit Beta 项目：权限不足");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, "无法退出 2kbit Beta 项目：权限不足");
                 }
             }
         }

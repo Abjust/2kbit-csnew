@@ -9,19 +9,20 @@
 // 您应该已经收到了一份GNU Affero通用公共许可证的副本。 如果没有，请参见<https://www.gnu.org/licenses/>。
 
 /**
- * 2kbit C# Edition: New
- * 选择权模块：重新加入项目
+* 2kbit C# Edition: New
+* 木鱼模块：还你木鱼
 **/
 
+using Microsoft.International.Converters.TraditionalChineseToSimplifiedConverter;
 using Mirai.Net.Data.Messages;
 using Mirai.Net.Data.Messages.Receivers;
 using Mirai.Net.Modules;
 using Mirai.Net.Utils.Scaffolds;
 using Net_Codeintp_cs.Modules.Utils;
 
-namespace Net_Codeintp_cs.Modules.Group.Commands.Choice
+namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
 {
-    internal class OptIn : IModule
+    internal class Deregister : IModule
     {
         public bool? IsEnable { get; set; }
 
@@ -29,26 +30,18 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Choice
         {
             GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
             string s = receiver.MessageChain.GetPlainMessage();
-            if (s == "!optin")
+            if (ChineseConverter.Convert(s, ChineseConversionDirection.TraditionalToSimplified) == "还你木鱼")
             {
-                if (Permission.IsGroupAdmin(receiver.GroupId, receiver.Sender.Id))
+                if (Json.FileExists("woodenfish") && Json.ObjectExistsInArray("woodenfish", "players", "playerid", receiver.Sender.Id))
                 {
-                    if (Json.ObjectExistsInArray("optedout", "groups", "groupid", receiver.GroupId))
-                    {
-                        Logger.Info($"已令“{receiver.GroupName} ({receiver.GroupId})”重新加入 2kbit Beta 项目！");
-                        Json.DeleteObjectFromArray("optedout", "groups", "groupid", receiver.GroupId);
-                        Update.Do();
-                        await TrySend.Quote(receiver, "已重新加入 2kbit Beta 项目（此群将开始收到此机器人的消息）");
-                    }
-                    else
-                    {
-                        Logger.Warning($"未尝试令“{receiver.GroupName} ({receiver.GroupId})”重新加入 2kbit Beta 项目，因为此群已经加入了！");
-                        await TrySend.Quote(receiver, "无法重新加入 2kbit Beta 项目：此群已经加入");
-                    }
+                    Json.DeleteObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id);
+                    Logger.Info($"已注销“{receiver.Sender.Name} ({receiver.Sender.Id})”的木鱼账号！");
+                    await TrySend.Quote(receiver, "不知道写啥，反正，账号注销辣！");
                 }
                 else
                 {
-                    Logger.Warning($"未尝试令“{receiver.GroupName} ({receiver.GroupId})”重新加入 2kbit Beta 项目，因为执行者权限不足！");
+                    Logger.Warning($"未尝试注销“{receiver.Sender.Name} ({receiver.Sender.Id})”的木鱼账号，因为此人还没有注册过！");
+                    await TrySend.Quote(receiver, "宁踏马害没注册？快发送“给我木鱼”注册罢！");
                 }
             }
         }

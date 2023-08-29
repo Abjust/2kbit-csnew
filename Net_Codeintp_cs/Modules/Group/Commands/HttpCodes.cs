@@ -122,9 +122,10 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
                                 {
                                     await receiver.QuoteMessageAsync("正在加载，请稍候……");
                                     MessageChain messageChain = new MessageChainBuilder()
-                                    .Plain(explanations[codes.IndexOf(code)])
-                                    .ImageFromUrl($"https://http.cat/{code}")
-                                    .Build();
+                                        .At(receiver.Sender.Id)
+                                        .Plain($"{explanations[codes.IndexOf(code)]}")
+                                        .ImageFromUrl($"https://http.cat/{code}")
+                                        .Build();
                                     await receiver.QuoteMessageAsync(messageChain);
                                 }
                                 catch (Exception ex)
@@ -134,28 +135,13 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
                             }
                             else if (!codes.Contains(s[1]))
                             {
-                                try
-                                {
-                                    await receiver.QuoteMessageAsync("未找到关于该状态码的解释");
-                                }
-                                catch (Exception ex)
-                                {
-                                    Console.WriteLine($"出现错误！错误信息：{ex}");
-                                }
+                                await TrySend.Quote(receiver, "未找到关于该状态码的解释");
                                 break;
                             }
                         }
                         break;
                     default:
-                        try
-                        {
-                            await receiver.SendMessageAsync("输入!http <状态码>可查看关于该状态码的解释");
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.Error("群消息发送失败！");
-                            Logger.Debug($"错误信息：\n{e.Message}");
-                        }
+                        await TrySend.Quote(receiver, "输入!http <状态码>可查看关于该状态码的解释");
                         break;
                 }
             }

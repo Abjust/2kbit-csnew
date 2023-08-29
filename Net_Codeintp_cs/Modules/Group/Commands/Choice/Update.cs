@@ -31,7 +31,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Choice
                 Json.CreateFile("optedout", objects);
             }
             JObject obj = Json.ReadFile("optedout");
-            if ((JArray)obj["groups"]! != null)
+            if ((JArray)obj["groups"]! is not null)
             {
                 foreach (JObject item in ((JArray)obj["groups"]!).Cast<JObject>())
                 {
