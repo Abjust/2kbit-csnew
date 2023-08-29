@@ -32,86 +32,57 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Admin
             string[] s = receiver.MessageChain.MiraiCode.Trim().Split(" ");
             if (s[0] == "!mute")
             {
+                int duration = 0;
                 switch (s.Length)
                 {
-                    case >= 2:
-                        switch (Permission.IsGroupAdmin(receiver.GroupId, receiver.Sender.Id))
+                    case 3:
+                        if (int.TryParse(s[2], out int minutes) && minutes >= 1 && minutes <= 43199)
                         {
-                            case true:
-                                switch (Permission.IsGroupAdmin(receiver.GroupId, Identify.Do(s[1])))
-                                {
-                                    case false:
-                                        string minutes = s[2] ?? "10";
-                                        try
-                                        {
-                                            await GroupManager.MuteAsync(Identify.Do(s[1]), receiver.GroupId, int.Parse(minutes) * 60);
-                                            Logger.Info($"禁言操作已执行！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{Identify.Do(s[1])}\n时长：{minutes} 分钟");
-                                            try
-                                            {
-                                                await receiver.SendMessageAsync($"已禁言 {Identify.Do(s[1])}：{minutes} 分钟");
-                                            }
-                                            catch (Exception e)
-                                            {
-                                                Logger.Error("群消息发送失败！");
-                                                Logger.Debug($"错误信息：\n{e.Message}");
-                                            }
-                                            break;
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            Logger.Error($"已尝试执行禁言操作，但是失败了！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{Identify.Do(s[1])}\n时长：{minutes} 分钟");
-                                            Logger.Debug($"错误信息：\n{ex.Message}");
-                                            try
-                                            {
-                                                await receiver.SendMessageAsync($"无法禁言 {Identify.Do(s[1])}：请检查机器人和被执行者在群内的权限，以及提供的参数是否正确");
-                                            }
-                                            catch (Exception e)
-                                            {
-                                                Logger.Error("群消息发送失败！");
-                                                Logger.Debug($"错误信息：\n{e.Message}");
-                                            }
-                                        }
-                                        break;
-                                    default:
-                                        Logger.Warning($"未尝试执行禁言操作，因为被执行者是机器人管理员！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{Identify.Do(s[1])}");
-                                        try
-                                        {
-                                            await receiver.SendMessageAsync($"无法禁言 {Identify.Do(s[1])}：被执行者是机器人管理员");
-                                        }
-                                        catch (Exception e)
-                                        {
-                                            Logger.Error("群消息发送失败！");
-                                            Logger.Debug($"错误信息：\n{e.Message}");
-                                        }
-                                        break;
-                                }
-                                break;
-                            default:
-                                Logger.Warning($"未尝试执行禁言操作，因为执行者权限不足！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{Identify.Do(s[1])}");
-                                try
-                                {
-                                    await receiver.SendMessageAsync($"无法禁言 {Identify.Do(s[1])}：权限不足（如果是群主，请先尝试使用!op将自己设置成本群管理员）");
-                                }
-                                catch (Exception e)
-                                {
-                                    Logger.Error("群消息发送失败！");
-                                    Logger.Debug($"错误信息：\n{e.Message}");
-                                }
-                                break;
+                            duration = minutes;
                         }
                         break;
-                    default:
-                        Logger.Warning($"未尝试执行禁言操作，因为提供的参数有误！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                        try
-                        {
-                            await receiver.SendMessageAsync("参数错误");
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.Error("群消息发送失败！");
-                            Logger.Debug($"错误信息：\n{e.Message}");
-                        }
+                    case 2:
+                        duration = 10;
                         break;
+                }
+                if (duration > 0)
+                {
+                    switch (Permission.IsGroupAdmin(receiver.GroupId, receiver.Sender.Id))
+                    {
+                        case true:
+                            switch (Permission.IsGroupAdmin(receiver.GroupId, Identify.Do(s[1])))
+                            {
+                                case false:
+                                    try
+                                    {
+                                        await GroupManager.MuteAsync(Identify.Do(s[1]), receiver.GroupId, duration * 60);
+                                        Logger.Info($"禁言操作已执行！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{Identify.Do(s[1])}\n时长：{duration} 分钟");
+                                        await TrySend.Quote(receiver, $"已禁言 {Identify.Do(s[1])}：{duration} 分钟");
+                                        break;
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Logger.Error($"已尝试执行禁言操作，但是失败了！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{Identify.Do(s[1])}\n时长：{duration} 分钟");
+                                        Logger.Debug($"错误信息：\n{ex.Message}");
+                                        await TrySend.Quote(receiver, $"无法禁言 {Identify.Do(s[1])}：机器人踏马的有权限？人家踏马的事群管？这让我怎么搞？（恼）");
+                                    }
+                                    break;
+                                default:
+                                    Logger.Warning($"未尝试执行禁言操作，因为被执行者是机器人管理员！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{Identify.Do(s[1])}");
+                                    await TrySend.Quote(receiver, $"无法禁言 {Identify.Do(s[1])}：人家踏马事机器人管理员（恼）");
+                                    break;
+                            }
+                            break;
+                        default:
+                            Logger.Warning($"未尝试执行禁言操作，因为执行者权限不足！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{Identify.Do(s[1])}");
+                            await TrySend.Quote(receiver, $"无法禁言 {Identify.Do(s[1])}：宁踏马有权限吗？（恼）（要是宁踏马的事群主，就去用!op把自己设置成本群管理员，ok？）");
+                            break;
+                    }
+                }
+                else
+                {
+                    Logger.Warning($"未尝试执行禁言操作，因为提供的参数有误！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
+                    await TrySend.Quote(receiver, "捏吗，参数有问题让我怎么执行？（恼）");
                 }
             }
         }

@@ -40,57 +40,25 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Admin
                             case true:
                                 Json.DeleteObjectFromArray("ops", "global.list", "qq", Identify.Do(s[1]));
                                 Logger.Info($"已撤销全局机器人管理员！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{Identify.Do(s[1])}");
-                                try
-                                {
-                                    await receiver.SendMessageAsync($"已撤销 {Identify.Do(s[1])} 的全局机器人管理员权限");
-                                }
-                                catch (Exception e)
-                                {
-                                    Logger.Error("群消息发送失败！");
-                                    Logger.Debug($"错误信息：\n{e.Message}");
-                                }
+                                await TrySend.Quote(receiver, $"已撤销 {Identify.Do(s[1])} 的全局机器人管理员权限");
                                 Update.Do();
                                 break;
                             default:
                                 Logger.Warning($"未尝试撤销全局机器人管理员，因为被执行者不具备此权限！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{Identify.Do(s[1])}");
-                                try
-                                {
-                                    await receiver.SendMessageAsync($"无法撤销 {Identify.Do(s[1])} 的全局机器人管理员权限：被执行者不具备此权限");
-                                }
-                                catch (Exception e)
-                                {
-                                    Logger.Error("群消息发送失败！");
-                                    Logger.Debug($"错误信息：\n{e.Message}");
-                                }
+                                await TrySend.Quote(receiver, $"无法撤销 {Identify.Do(s[1])} 的全局机器人管理员权限：宁踏马搁这虚空打靶呢？（恼）");
                                 break;
                         }
                     }
                     else
                     {
                         Logger.Warning($"未尝试撤销全局机器人管理员，因为执行者权限不足！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{Identify.Do(s[1]) ?? null}");
-                        try
-                        {
-                            await receiver.SendMessageAsync($"无法撤销 {Identify.Do(s[1]) ?? null} 的全局机器人管理员权限：权限不足");
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.Error("群消息发送失败！");
-                            Logger.Debug($"错误信息：\n{e.Message}");
-                        }
+                        await TrySend.Quote(receiver, $"无法撤销 {Identify.Do(s[1])} 的全局机器人管理员权限：宁踏马有权限吗？（恼）");
                     }
                 }
                 else
                 {
                     Logger.Warning($"未尝试撤销“{receiver.GroupName} ({receiver.GroupId})”的一名成员在此群的机器人管理员权限，因为提供的参数有误！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                    try
-                    {
-                        await receiver.SendMessageAsync("参数错误");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, "捏吗，参数有问题让我怎么执行？（恼）");
                 }
             }
         }

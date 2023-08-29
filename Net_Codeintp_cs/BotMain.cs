@@ -22,6 +22,7 @@ using Mirai.Net.Modules;
 using Mirai.Net.Sessions;
 using Mirai.Net.Sessions.Http.Managers;
 using Mirai.Net.Utils.Scaffolds;
+using Net_Codeintp_cs.Modules.Group;
 using Net_Codeintp_cs.Modules.Group.Tasks;
 using Net_Codeintp_cs.Modules.Utils;
 using System.Reactive.Linq;
@@ -127,56 +128,12 @@ namespace Net_Codeintp_cs
             // 戳一戳效果
             bot.EventReceived
             .OfType<NudgeEvent>()
-            .Subscribe(async receiver =>
+            .Subscribe(receiver =>
             {
-                string[] words =
-                            {
-                                 "cnmd",
-                                 "你更是歌姬吧嗷",
-                                 "你个狗比玩意",
-                                 "你是不是被抛上去3次，却只被接住2次？",
-                                 "你真是小母牛坐灯泡，牛逼一闪又一闪",
-                                 "小嘴像抹了开塞露一样",
-                                 "小东西长得真随机",
-                                 "我只想骂人，但不想骂你",
-                                 "但凡你有点用，也不至于一点用处都没有",
-                                 "你还真把自己当个人看了，你也配啊",
-                                 "那么丑的脸，就可以看出你是金针菇",
-                                 "阁下长得真是天生励志",
-                                 "装逼对你来说就像一日三餐的事",
-                                 "我怎么敢碰你呢，我怕我买洗手液买穷自己",
-                                 "狗咬了你，你还能咬回狗吗",
-                                 "你是独一无二的，至少全人类都不希望再有第二个",
-                                 "你的智商和喜马拉雅山的氧气一样，稀薄",
-                                 "别人的脸是七分天注定，三分靠打扮，你的脸是一分天注定，九分靠滤镜",
-                                 "偶尔也要活得强硬一点，软得像滩烂泥一样有什么意思",
-                                 "任何人工智能都敌不过阁下这款天然呆",
-                                 "我骂你是为了你好，你应该从中学到些什么，比如说自知之明",
-                                 "你要好好做自己，反正别的你也做不好",
-                                 "如果国家把长相分等级的话，你的长相，都可以吃低保了",
-                                 "你没权利看不惯我的生活方式，但你有权抠瞎自己的双眼",
-                                 "如果你觉得我哪里不对，请一定要告诉我，反正我也不会改，你别憋出病来",
-                                 "你（  ）什么时候（  ）啊",
-                                 "四吗玩意，说我是歌姬吧，你怎么不撒泡尿照照镜子看看你自己，狗比玩意",
-                                 "握草泥马呀—\r\n我操尼玛啊啊啊啊—\r\n我—操—你—妈—\r\n听到没，我—操—你—妈—"
-                            };
+
                 if (receiver.Target == BotQQ && receiver.Subject.Kind == "Group" && !Permission.IsOptedOut(receiver.Subject.Id))
                 {
-                    Random r = new();
-                    int index = r.Next(words.Length);
-                    MessageChain? messageChain = new MessageChainBuilder()
-                            .At(receiver.FromId)
-                            .Plain($" {words[index]}")
-                            .Build();
-                    try
-                    {
-                        await MessageManager.SendGroupMessageAsync(receiver.Subject.Id, messageChain);
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    Zuan.Execute(receiver.Subject.Id, receiver.FromId);
                 }
             });
             // bot被加好友
@@ -191,7 +148,7 @@ namespace Net_Codeintp_cs
             .OfType<NewInvitationRequestedEvent>()
             .Subscribe(async e =>
             {
-                if (e.FromId == OwnerQQ)
+                if (e.FromId is not null)
                 {
                     // 同意邀请
                     await RequestManager.HandleNewInvitationRequestedAsync(e, NewInvitationRequestHandlers.Approve, "");
@@ -244,7 +201,7 @@ namespace Net_Codeintp_cs
                Logger.Info($"侦测到撤回！\n群：{receiver.Group.Name} ({receiver.Group.Id})\n执行者：{receiver.Operator.Name} ({receiver.Operator.Id})\n被执行者：{receiver.AuthorId}");
                MessageChain messageChain = new MessageChainBuilder()
                 .At(receiver.Operator.Id)
-                .Plain(" 你又撤回了什么见不得人的东西？")
+                .Plain(" 宁踏马又撤回了什么见不得人的东西？（恼）")
                 .Build();
                if (!Permission.IsOptedOut(receiver.Group.Id))
                {
@@ -350,7 +307,7 @@ namespace Net_Codeintp_cs
                 friend_modules.Raise(friend);
             });
             // 加载群消息模块
-            List<IModule> group_modules = new Modules.Group.LoadModules().GetModules();
+            List<IModule> group_modules = new LoadModules().GetModules();
             foreach (IModule module in group_modules)
             {
                 module.IsEnable = true;
@@ -358,7 +315,7 @@ namespace Net_Codeintp_cs
             }
             bot.MessageReceived.SubscribeGroupMessage(group =>
             {
-                if (!Permission.IsOptedOut(group.GroupId) || group.MessageChain.GetPlainMessage() == "!optin" || group.MessageChain.GetPlainMessage() == "!optout")
+                if (!Permission.IsOptedOut(group.GroupId) || group.MessageChain.GetPlainMessage() == "!optin")
                 {
                     if (!Permission.IsIgnored(group.GroupId, group.Sender.Id))
                     {

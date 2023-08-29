@@ -10,29 +10,31 @@
 
 /**
  * 2kbit C# Edition: New
- * 测试模块
+ * 群消息发送工具模块
 **/
 
 using Mirai.Net.Data.Messages;
 using Mirai.Net.Data.Messages.Receivers;
-using Mirai.Net.Modules;
 using Mirai.Net.Utils.Scaffolds;
-using Net_Codeintp_cs.Modules.Utils;
 
-namespace Net_Codeintp_cs.Modules.Group.Commands
+namespace Net_Codeintp_cs.Modules.Utils
 {
-    public class HelloWorld : IModule
+    internal class TrySend
     {
-        public bool? IsEnable { get; set; }
-
-        public async void Execute(MessageReceiverBase @base)
+        public static async Task Quote(GroupMessageReceiver receiver, string content)
         {
-            GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
-            switch (receiver.MessageChain.GetPlainMessage())
+            try
             {
-                case "!test":
-                    await TrySend.Quote(receiver, "Hello World!");
-                    break;
+                MessageChain messageChain = new MessageChainBuilder()
+                                                .At(receiver.Sender.Id)
+                                                .Plain($" {content}")
+                                                .Build();
+                await receiver.QuoteMessageAsync(messageChain);
+            }
+            catch (Exception e)
+            {
+                Logger.Error("群消息发送失败！");
+                Logger.Debug($"错误信息：\n{e.Message}");
             }
         }
     }

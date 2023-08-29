@@ -13,6 +13,7 @@
 * 木鱼模块：我的木鱼
 **/
 
+using Microsoft.International.Converters.TraditionalChineseToSimplifiedConverter;
 using Mirai.Net.Data.Messages;
 using Mirai.Net.Data.Messages.Receivers;
 using Mirai.Net.Modules;
@@ -31,7 +32,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
         {
             GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
             string s = receiver.MessageChain.GetPlainMessage();
-            if (s == "我的木鱼")
+            if (ChineseConverter.Convert(s, ChineseConversionDirection.TraditionalToSimplified) == "我的木鱼")
             {
                 string status = "";
                 string word = "";
@@ -47,12 +48,12 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                             case 0:
                                 status = "正常";
                                 word = "【敲电子木鱼，见机甲佛祖，取赛博真经】";
-                                if (Math.Log10((int)item["gongde"]!) >= 1 && (double)item["e"]! <= 200)
+                                if (Math.Log10((int)item["gongde"]!) >= 6 && (double)item["e"]! <= 200)
                                 {
                                     Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "e", Math.Log10(Math.Pow(10, (double)item["e"]!) + (long)item["gongde"]!));
                                     Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "gongde", 0);
                                 }
-                                if (Math.Log10((double)item["e"]!) >= 1 && (double)item["ee"]! <= 200)
+                                if (Math.Log10((double)item["e"]!) >= 2 && (double)item["ee"]! <= 200)
                                 {
                                     Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "ee", Math.Log10(Math.Pow(10, (double)item["ee"]!) + (double)item["e"]!));
                                     Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "e", 0);
@@ -88,6 +89,24 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                             Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "info_count", 1);
                             Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "info_time", new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds());
                         }
+                        if ((double)item["ee"]! >= 300)
+                        {
+                            if ((double)item["nirvana"]! + 0.2 <= 5)
+                            {
+                                Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "nirvana", Math.Truncate(((double)item["nirvana"]! + 0.2) * 100) / 100);
+                            }
+                            else
+                            {
+                                Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "nirvana", 5);
+                            }
+                            Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "level", 1);
+                            Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "ee", 0);
+                            Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "e", 0);
+                            Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "gongde", 0);
+                            await TrySend.Quote(receiver, "宁踏马功德太多辣（恼）（已自动涅槃重生，涅槃值+0.2）");
+                        }
+                        obj = Json.ReadFile("woodenfish");
+                        item = (JObject)obj["players"]!.Where(x => x.SelectToken("playerid")!.Value<string>()! == receiver.Sender.Id).FirstOrDefault()!;
                         string gongde;
                         string expression = "";
                         if ((double)item["ee"]! >= 1)
@@ -104,24 +123,27 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                         {
                             gongde = ((int)item["gongde"]!).ToString();
                         }
+                        string gongde_low = "";
+                        string expression_low = "";
+                        if ((double)item["ee"]! >= 1)
+                        {
+                            expression_low = $"10^{Math.Truncate(10000 * (double)item["e"]!) / 10000}";
+                            gongde_low = $"\ne (log10)：{Math.Truncate(10000 * (double)item["e"]!) / 10000}（{expression_low}）\n原始功德：{(int)item["gongde"]!}";
+                        }
+                        else if ((double)item["e"]! >= 1)
+                        {
+                            gongde_low = $"\n原始功德：{(int)item["gongde"]!}";
+                        }
+                        else
+                        {
+                            gongde_low = "无";
+                        }
                         if (new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds() - (long)item["info_time"]! <= 10 && (int)item["info_count"]! > 5)
                         {
                             Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "info_ctrl", new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds() + 180);
                             Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "info_count", 0);
                             Logger.Warning($"因疑似刷屏，有人被暂时禁止使用我的木鱼功能！\n被执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                            MessageChain messageChain = new MessageChainBuilder()
-                                    .At(receiver.Sender.Id)
-                                    .Plain(" 宁踏马3分钟之内别想用我的木鱼辣（恼）")
-                                    .Build();
-                            try
-                            {
-                                await receiver.SendMessageAsync(messageChain);
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("群消息发送失败！");
-                                Logger.Debug($"错误信息：\n{e.Message}");
-                            }
+                            await TrySend.Quote(receiver, "宁踏马3分钟之内别想用我的木鱼辣（恼）");
                         }
                         else
                         {
@@ -133,13 +155,14 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
 账号状态：{status}
 木鱼等级：{(int)item["level"]!}
 涅槃值：{(double)item["nirvana"]!}
-当前速度：{(int)Math.Ceiling(60 * Math.Pow(0.98, (int)item["level"]! - 1))} 秒/周期
+当前速度：{(int)Math.Ceiling(60 * Math.Pow(0.978, (int)item["level"]! - 1))} 秒/周期
 当前功德：{gongde}
+低级功德储备：{gongde_low}
 {word}")
                                 .Build();
                             try
                             {
-                                await receiver.SendMessageAsync(messageChain);
+                                await receiver.QuoteMessageAsync(messageChain);
                             }
                             catch (Exception e)
                             {
@@ -152,15 +175,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                 else
                 {
                     Logger.Warning($"未尝试显示“{receiver.Sender.Name} ({receiver.Sender.Id})”的木鱼账号，因为此人没有注册木鱼账号！");
-                    try
-                    {
-                        await receiver.SendMessageAsync("宁踏马害没注册？快发送“给我木鱼”注册罢！");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, "宁踏马害没注册？快发送“给我木鱼”注册罢！");
                 }
             }
         }

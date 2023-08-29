@@ -37,18 +37,22 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Scheduler
             {
                 if (Json.FileExists("schedules"))
                 {
+                    int taskid = 0;
+                    bool status = true;
+                    string failed = "";
                     switch (s.Length)
                     {
                         case 4:
+                            JObject obj = Json.ReadFile("schedules");
                             switch (s[1])
                             {
                                 case "byid":
-                                    if (int.TryParse(s[2], out int taskid))
+                                    if (int.TryParse(s[2], out int tid))
                                     {
-                                        JObject obj = Json.ReadFile("schedules");
                                         JObject item = (JObject)obj["schedules"]!.Where(x => x.SelectToken("taskid")!.ToString() == taskid.ToString()).FirstOrDefault()!;
-                                        if (item != null)
+                                        if (item is not null)
                                         {
+                                            failed = "denied";
                                             if (bool.TryParse(s[3], out bool enabled))
                                             {
                                                 if ((bool)obj["enabled"]! != enabled)
@@ -56,128 +60,51 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Scheduler
                                                     switch ((string)item["scope"]!)
                                                     {
                                                         case "all":
-                                                            switch (Permission.IsGlobalAdmin(receiver.Sender.Id))
+                                                            if (Permission.IsGlobalAdmin(receiver.Sender.Id))
                                                             {
-                                                                case true:
-                                                                    Logger.Info($"已切换定时任务状态！\n任务ID：{obj["taskid"]}\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                                                                    Json.ModifyObjectFromArray("schedules", "schedules", "taskid", (int)obj["taskid"]!, "enabled", enabled);
-                                                                    await Schedules.Initialize();
-                                                                    try
-                                                                    {
-                                                                        await receiver.SendMessageAsync("已切换定时任务状态！");
-                                                                    }
-                                                                    catch (Exception e)
-                                                                    {
-                                                                        Logger.Error("群消息发送失败！");
-                                                                        Logger.Debug($"错误信息：\n{e.Message}");
-                                                                    }
-                                                                    break;
-                                                                default:
-                                                                    Logger.Warning($"未尝试切换定时任务状态，因为执行者权限不足！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                                                                    try
-                                                                    {
-                                                                        await receiver.SendMessageAsync("无法切换定时任务状态：权限不足");
-                                                                    }
-                                                                    catch (Exception e)
-                                                                    {
-                                                                        Logger.Error("群消息发送失败！");
-                                                                        Logger.Debug($"错误信息：\n{e.Message}");
-                                                                    }
-                                                                    break;
+                                                                failed = "";
+                                                                taskid = tid;
+                                                                status = enabled;
                                                             }
                                                             break;
                                                         default:
-                                                            switch (Permission.IsGroupAdmin(receiver.GroupId, receiver.Sender.Id))
+                                                            if (Permission.IsGroupAdmin(receiver.GroupId, receiver.Sender.Id))
                                                             {
-                                                                case true:
-                                                                    Logger.Info($"已切换定时任务状态！\n任务ID：{item["taskid"]}\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                                                                    Json.DeleteObjectFromArray("schedules", "schedules", "taskid", s[2]);
-                                                                    try
-                                                                    {
-                                                                        await receiver.SendMessageAsync("已切换定时任务状态！");
-                                                                    }
-                                                                    catch (Exception e)
-                                                                    {
-                                                                        Logger.Error("群消息发送失败！");
-                                                                        Logger.Debug($"错误信息：\n{e.Message}");
-                                                                    }
-                                                                    break;
-                                                                default:
-                                                                    Logger.Warning($"未尝试切换定时任务状态，因为执行者权限不足！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                                                                    try
-                                                                    {
-                                                                        await receiver.SendMessageAsync("无法切换定时任务状态：权限不足");
-                                                                    }
-                                                                    catch (Exception e)
-                                                                    {
-                                                                        Logger.Error("群消息发送失败！");
-                                                                        Logger.Debug($"错误信息：\n{e.Message}");
-                                                                    }
-                                                                    break;
+                                                                failed = "";
+                                                                taskid = tid;
+                                                                status = enabled;
                                                             }
                                                             break;
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    try
-                                                    {
-                                                        await receiver.SendMessageAsync("目标状态格式有误！");
-                                                    }
-                                                    catch (Exception e)
-                                                    {
-                                                        Logger.Error("群消息发送失败！");
-                                                        Logger.Debug($"错误信息：\n{e.Message}");
-                                                    }
+                                                    failed = "generic";
+                                                    await TrySend.Quote(receiver, "目标状态格式有误！");
                                                 }
                                             }
                                             else
                                             {
-                                                Logger.Warning($"未尝试切换定时任务状态，因为状态未有实际改变！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                                                try
-                                                {
-                                                    await receiver.SendMessageAsync("无法切换定时任务状态：状态未有实际改变");
-                                                }
-                                                catch (Exception e)
-                                                {
-                                                    Logger.Error("群消息发送失败！");
-                                                    Logger.Debug($"错误信息：\n{e.Message}");
-                                                }
+                                                failed = "nochange";
                                                 break;
                                             }
                                         }
                                         else
                                         {
                                             Logger.Warning($"未尝试切换定时任务状态，因为找不到该任务！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                                            try
-                                            {
-                                                await receiver.SendMessageAsync("无法切换定时任务状态：找不到");
-                                            }
-                                            catch (Exception e)
-                                            {
-                                                Logger.Error("群消息发送失败！");
-                                                Logger.Debug($"错误信息：\n{e.Message}");
-                                            }
+                                            await TrySend.Quote(receiver, "无法切换定时任务状态：找不到");
                                             break;
                                         }
                                     }
                                     else
                                     {
-                                        try
-                                        {
-                                            await receiver.SendMessageAsync("任务ID格式有误！");
-                                        }
-                                        catch (Exception e)
-                                        {
-                                            Logger.Error("群消息发送失败！");
-                                            Logger.Debug($"错误信息：\n{e.Message}");
-                                        }
+                                        failed = "generic";
+                                        await TrySend.Quote(receiver, "任务ID格式有误！");
                                     }
                                     break;
                                 case "bytime":
                                     if (TimeSpan.TryParseExact($"{s[2]}", "h\\:mm", CultureInfo.CurrentCulture, out TimeSpan timespan))
                                     {
-                                        JObject obj = Json.ReadFile("schedules");
                                         IEnumerable<JToken> items = obj["schedules"]!;
                                         JObject selected = new();
                                         bool isall = false;
@@ -206,147 +133,84 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Scheduler
                                                     switch (isall)
                                                     {
                                                         case true:
-                                                            switch (Permission.IsGlobalAdmin(receiver.Sender.Id))
+                                                            if (Permission.IsGlobalAdmin(receiver.Sender.Id))
                                                             {
-                                                                case true:
-                                                                    Logger.Info($"已切换定时任务状态！\n任务ID：{selected["taskid"]}\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                                                                    Json.ModifyObjectFromArray("schedules", "schedules", "taskid", (int)selected["taskid"]!, "enabled", enabled);
-                                                                    await Schedules.Initialize();
-                                                                    try
-                                                                    {
-                                                                        await receiver.SendMessageAsync("已切换定时任务状态！");
-                                                                    }
-                                                                    catch (Exception e)
-                                                                    {
-                                                                        Logger.Error("群消息发送失败！");
-                                                                        Logger.Debug($"错误信息：\n{e.Message}");
-                                                                    }
-                                                                    break;
-                                                                case false:
-                                                                    Logger.Warning($"未尝试切换定时任务状态，因为执行者权限不足！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                                                                    try
-                                                                    {
-                                                                        await receiver.SendMessageAsync("无法切换定时任务状态：权限不足");
-                                                                    }
-                                                                    catch (Exception e)
-                                                                    {
-                                                                        Logger.Error("群消息发送失败！");
-                                                                        Logger.Debug($"错误信息：\n{e.Message}");
-                                                                    }
-                                                                    break;
+                                                                failed = "";
+                                                                taskid = (int)selected["taskid"]!;
+                                                                status = enabled;
                                                             }
                                                             break;
                                                         case false:
-                                                            switch (Permission.IsGroupAdmin(receiver.GroupId, receiver.Sender.Id))
+                                                            if (Permission.IsGlobalAdmin(receiver.Sender.Id))
                                                             {
-                                                                case true:
-                                                                    Logger.Info($"已切换定时任务状态！\n任务ID：{selected["taskid"]}\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                                                                    Json.DeleteObjectFromArray("schedules", "schedules", "taskid", selected["taskid"]!);
-                                                                    await Schedules.Initialize();
-                                                                    try
-                                                                    {
-                                                                        await receiver.SendMessageAsync("已切换定时任务状态！");
-                                                                    }
-                                                                    catch (Exception e)
-                                                                    {
-                                                                        Logger.Error("群消息发送失败！");
-                                                                        Logger.Debug($"错误信息：\n{e.Message}");
-                                                                    }
-                                                                    break;
-                                                                case false:
-                                                                    Logger.Warning($"未尝试切换定时任务状态，因为执行者权限不足！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                                                                    try
-                                                                    {
-                                                                        await receiver.SendMessageAsync("无法切换定时任务状态：权限不足");
-                                                                    }
-                                                                    catch (Exception e)
-                                                                    {
-                                                                        Logger.Error("群消息发送失败！");
-                                                                        Logger.Debug($"错误信息：\n{e.Message}");
-                                                                    }
-                                                                    break;
+                                                                failed = "";
+                                                                taskid = (int)selected["taskid"]!;
+                                                                status = enabled;
                                                             }
                                                             break;
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    Logger.Warning($"未尝试切换定时任务状态，因为状态未有实际改变！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                                                    try
-                                                    {
-                                                        await receiver.SendMessageAsync("无法切换定时任务状态：状态未有实际改变");
-                                                    }
-                                                    catch (Exception e)
-                                                    {
-                                                        Logger.Error("群消息发送失败！");
-                                                        Logger.Debug($"错误信息：\n{e.Message}");
-                                                    }
+                                                    failed = "nochange";
                                                 }
                                             }
                                             else
                                             {
-                                                try
-                                                {
-                                                    await receiver.SendMessageAsync("目标状态格式有误！");
-                                                }
-                                                catch (Exception e)
-                                                {
-                                                    Logger.Error("群消息发送失败！");
-                                                    Logger.Debug($"错误信息：\n{e.Message}");
-                                                }
+                                                failed = "generic";
+                                                await TrySend.Quote(receiver, "目标状态格式有误！");
                                             }
                                         }
                                         else
                                         {
-                                            Logger.Warning($"未尝试切换定时任务状态，因为找不到该任务！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                                            try
-                                            {
-                                                await receiver.SendMessageAsync("无法切换定时任务状态：找不到");
-                                            }
-                                            catch (Exception e)
-                                            {
-                                                Logger.Error("群消息发送失败！");
-                                                Logger.Debug($"错误信息：\n{e.Message}");
-                                            }
+                                            failed = "notfound";
                                         }
                                     }
                                     else
                                     {
-                                        try
-                                        {
-                                            await receiver.SendMessageAsync("时间格式有误！");
-                                        }
-                                        catch (Exception e)
-                                        {
-                                            Logger.Error("群消息发送失败！");
-                                            Logger.Debug($"错误信息：\n{e.Message}");
-                                        }
+                                        failed = "generic";
+                                        await TrySend.Quote(receiver, "时间格式有误！");
+                                        break;
                                     }
                                     break;
                                 default:
-                                    try
-                                    {
-                                        await receiver.SendMessageAsync("索引类型有误");
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        Logger.Error("群消息发送失败！");
-                                        Logger.Debug($"错误信息：\n{e.Message}");
-                                    }
+                                    failed = "generic";
+                                    await TrySend.Quote(receiver, "索引类型有误");
                                     break;
                             }
                             break;
                         default:
-                            try
-                            {
-                                await receiver.SendMessageAsync("参数错误");
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("群消息发送失败！");
-                                Logger.Debug($"错误信息：\n{e.Message}");
-                            }
+                            failed = "generic";
+                            await TrySend.Quote(receiver, "参数错误");
                             break;
+                    }
+                    if (taskid != 0)
+                    {
+                        Logger.Info($"已切换定时任务状态！\n任务ID：{taskid}\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
+                        Json.ModifyObjectFromArray("schedules", "schedules", "taskid", taskid, "enabled", status);
+                        await Schedules.Initialize();
+                        await TrySend.Quote(receiver, "已切换定时任务状态！");
+                    }
+                    else if (taskid == 0)
+                    {
+                        switch (failed)
+                        {
+                            case "denied":
+                                Logger.Warning($"未尝试修改定时任务，因为执行者权限不足！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
+                                await TrySend.Quote(receiver, "无法修改定时任务：权限不足");
+                                break;
+                            case "notfound":
+                                Logger.Warning($"未尝试修改定时任务，因为找不到该任务！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
+                                await TrySend.Quote(receiver, "无法修改定时任务：找不到");
+                                break;
+                            case "nochange":
+                                Logger.Warning($"未尝试切换定时任务状态，因为状态未有实际改变！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
+                                await TrySend.Quote(receiver, "无法切换定时任务状态：状态未有实际改变");
+                                break;
+                            case "generic":
+                                Logger.Warning($"未尝试修改定时任务，因为提供的参数有误！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
+                                break;
+                        }
                     }
                 }
             }

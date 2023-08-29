@@ -10,7 +10,7 @@
 
 /**
 * 2kbit C# Edition: New
-* 木鱼模块：功德榜
+* 木鱼模块：涅槃榜
 **/
 
 using Mirai.Net.Data.Messages;
@@ -22,7 +22,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
 {
-    internal class Leaderboard : IModule
+    internal class NirvanaLeaderboard : IModule
     {
         public bool? IsEnable { get; set; }
 
@@ -30,17 +30,17 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
         {
             GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
             string s = receiver.MessageChain.GetPlainMessage();
-            if (s == "功德榜")
+            if (s == "涅槃榜")
             {
                 if (Json.FileExists("woodenfish"))
                 {
                     JArray ar = (JArray)Json.ReadFile("woodenfish")["players"]!;
-                    ar = Json.Sort(ar, "ee", true);
+                    ar = Json.Sort(ar, "total_ban", true);
                     List<string> listed = new();
                     int limit = 10;
                     MessageChain messageChain = new MessageChainBuilder()
                             .At(receiver.Sender.Id)
-                            .Plain("\n功德榜\n赛博账号 --- 功德")
+                            .Plain("\n涅槃榜\n赛博账号 --- 涅槃值")
                             .Build();
                     foreach (JObject obj in ar.Cast<JObject>())
                     {
@@ -48,49 +48,10 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                         {
                             break;
                         }
-                        if (Math.Round((double)obj["ee"]!, 4) >= 1)
+                        if ((double)obj["nirvana"]! > 1)
                         {
-                            listed.Add((string)obj["playerid"]!);
                             MessageChain messageChain1 = new MessageChainBuilder()
-                                    .Plain($"\n{obj["playerid"]!} --- ee{Math.Truncate(10000 * (double)obj["ee"]!) / 10000}")
-                                    .Build();
-                            foreach (MessageBase message in messageChain1)
-                            {
-                                messageChain.Add(message);
-                            }
-                        }
-                    }
-                    ar = Json.Sort(ar, "e", true);
-                    foreach (JObject obj in ar.Cast<JObject>())
-                    {
-                        if (listed.Count >= limit)
-                        {
-                            break;
-                        }
-                        if (Math.Round((double)obj["e"]!, 4) >= 1 && !listed.Contains((string)obj["playerid"]!))
-                        {
-                            listed.Add((string)obj["playerid"]!);
-                            MessageChain messageChain1 = new MessageChainBuilder()
-                                    .Plain($"\n{obj["playerid"]!} --- e{Math.Truncate(10000 * (double)obj["e"]!) / 10000}")
-                                    .Build();
-                            foreach (MessageBase message in messageChain1)
-                            {
-                                messageChain.Add(message);
-                            }
-                        }
-                    }
-                    ar = Json.Sort(ar, "gongde", true);
-                    foreach (JObject obj in ar.Cast<JObject>())
-                    {
-                        if (listed.Count >= limit)
-                        {
-                            break;
-                        }
-                        if ((int)obj["gongde"]! >= 1 && !listed.Contains((string)obj["playerid"]!))
-                        {
-                            listed.Add((string)obj["playerid"]!);
-                            MessageChain messageChain1 = new MessageChainBuilder()
-                                    .Plain($"\n{obj["playerid"]!} --- {obj["gongde"]!}")
+                                    .Plain($"\n{obj["playerid"]!} --- {obj["nirvana"]!}")
                                     .Build();
                             foreach (MessageBase message in messageChain1)
                             {

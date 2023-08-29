@@ -31,7 +31,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Admin
             string[] s = receiver.MessageChain.GetPlainMessage().Split(" ");
             if (s[0] == "!listop")
             {
-                if (Permission.Ops != null)
+                if (Permission.Ops is not null)
                 {
                     string ids = "";
                     foreach (string item in Permission.Ops)
@@ -51,42 +51,18 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Admin
                     if (ids != "")
                     {
                         Logger.Info($"已尝试列举“{receiver.GroupName} ({receiver.GroupId})”的机器人管理员！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                        try
-                        {
-                            await receiver.SendMessageAsync($"本群机器人管理员：{ids}");
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.Error("群消息发送失败！");
-                            Logger.Debug($"错误信息：\n{e.Message}");
-                        }
+                        await TrySend.Quote(receiver, $"本群机器人管理员：{ids}");
                     }
                     else
                     {
                         Logger.Warning($"未尝试列举“{receiver.GroupName} ({receiver.GroupId})”的机器人管理员，因为此群没有设置机器人管理员！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                        try
-                        {
-                            await receiver.SendMessageAsync("本群没有机器人管理员！");
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.Error("群消息发送失败！");
-                            Logger.Debug($"错误信息：\n{e.Message}");
-                        }
+                        await TrySend.Quote(receiver, "踏马的，这群一个机器人管理员都没有的（恼）");
                     }
                 }
                 else
                 {
                     Logger.Warning($"未尝试列举“{receiver.GroupName} ({receiver.GroupId})”的机器人管理员，因为没有群设置了机器人管理员！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                    try
-                    {
-                        await receiver.SendMessageAsync("当前没有群设置了机器人管理员！");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, "当前没有群设置了机器人管理员！");
                 }
             }
         }

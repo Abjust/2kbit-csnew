@@ -38,29 +38,24 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
                     IEnumerable<Mirai.Net.Data.Shared.Group> groups = AccountManager.GetGroupsAsync().GetAwaiter().GetResult();
                     foreach (Mirai.Net.Data.Shared.Group group in groups)
                     {
-                        try
+                        if (!Permission.IsOptedOut(group.Id))
                         {
-                            await group.SendGroupMessageAsync(new MiraiCodeMessage(receiver.MessageChain.MiraiCode.Replace("!announce ", "")));
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.Error("群消息发送失败！");
-                            Logger.Debug($"错误信息：\n{e.Message}");
+                            try
+                            {
+                                await group.SendGroupMessageAsync(new MiraiCodeMessage(receiver.MessageChain.MiraiCode.Replace("!announce ", "")));
+                            }
+                            catch (Exception e)
+                            {
+                                Logger.Error("群消息发送失败！");
+                                Logger.Debug($"错误信息：\n{e.Message}");
+                            }
                         }
                     }
                 }
                 else
                 {
                     Logger.Warning($"未尝试播报跨群公告，因为执行者不是机器人主人！\n执行者：{receiver.Sender.Id}");
-                    try
-                    {
-                        await receiver.SendMessageAsync("你不是机器人主人");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, "你不是机器人主人");
                 }
             }
         }

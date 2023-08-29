@@ -16,7 +16,6 @@
 using Mirai.Net.Data.Messages;
 using Mirai.Net.Data.Messages.Receivers;
 using Mirai.Net.Modules;
-using Mirai.Net.Sessions.Http.Managers;
 using Mirai.Net.Utils.Scaffolds;
 using Net_Codeintp_cs.Modules.Utils;
 using Newtonsoft.Json.Linq;
@@ -45,75 +44,25 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Admin
                                     new JProperty("qq", Identify.Do(s[1])));
                                     Json.AddObjectToArray("ignores", "groups.list", o, "groupid", receiver.GroupId);
                                     Logger.Info($"已设置“{receiver.GroupName} ({receiver.GroupId})”的灰名单！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{Identify.Do(s[1])}");
-                                    try
-                                    {
-                                        await receiver.SendMessageAsync($"已将 {Identify.Do(s[1])} 加入到本群灰名单");
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        Logger.Error("群消息发送失败！");
-                                        Logger.Debug($"错误信息：\n{e.Message}");
-                                    }
-                                    try
-                                    {
-                                        await GroupManager.KickAsync(Identify.Do(s[1]), receiver.GroupId);
-                                        try
-                                        {
-                                            await receiver.SendMessageAsync($"已从本群踢出 {Identify.Do(s[1])}");
-                                        }
-                                        catch (Exception e)
-                                        {
-                                            Logger.Error("群消息发送失败！");
-                                            Logger.Debug($"错误信息：\n{e.Message}");
-                                        }
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        Logger.Error("踢出灰名单成员失败！");
-                                        Logger.Debug($"错误信息：\n{e.Message}");
-                                    }
+                                    await TrySend.Quote(receiver, $"已将 {Identify.Do(s[1])} 加入到本群灰名单");
                                     Update.Do();
                                     break;
                                 default:
                                     Logger.Warning($"未尝试设置“{receiver.GroupName} ({receiver.GroupId})”的灰名单，因为被执行者已经此群灰名单里了！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{Identify.Do(s[1])}");
-                                    try
-                                    {
-                                        await receiver.SendMessageAsync($"无法将 {Identify.Do(s[1])} 加入到本群灰名单：被执行者已经在本群灰名单里了");
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        Logger.Error("群消息发送失败！");
-                                        Logger.Debug($"错误信息：\n{e.Message}");
-                                    }
+                                    await TrySend.Quote(receiver, $"无法将 {Identify.Do(s[1])} 加入到本群灰名单：人家踏马已经是狗都不理了（恼）");
                                     break;
                             }
                             break;
                         default:
                             Logger.Warning($"未尝试设置“{receiver.GroupName} ({receiver.GroupId})”的灰名单，因为执行者权限不足！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{Identify.Do(s[1]) ?? null}");
-                            try
-                            {
-                                await receiver.SendMessageAsync($"无法将 {Identify.Do(s[1]) ?? null} 加入到本群灰名单：权限不足");
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("群消息发送失败！");
-                                Logger.Debug($"错误信息：\n{e.Message}");
-                            }
+                            await TrySend.Quote(receiver, $"无法将 {Identify.Do(s[1])} 加入到本群灰名单：宁踏马有权限吗？（恼）");
                             break;
                     }
                 }
                 else
                 {
                     Logger.Warning($"未尝试设置“{receiver.GroupName} ({receiver.GroupId})”的灰名单，因为提供的参数有误！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                    try
-                    {
-                        await receiver.SendMessageAsync("参数错误");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, "捏吗，参数有问题让我怎么执行？（恼）");
                 }
             }
         }

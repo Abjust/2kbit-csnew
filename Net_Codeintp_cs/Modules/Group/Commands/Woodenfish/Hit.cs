@@ -13,6 +13,7 @@
 * 木鱼模块：敲木鱼
 **/
 
+using Microsoft.International.Converters.TraditionalChineseToSimplifiedConverter;
 using Mirai.Net.Data.Messages;
 using Mirai.Net.Data.Messages.Receivers;
 using Mirai.Net.Modules;
@@ -30,7 +31,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
         {
             GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
             string s = receiver.MessageChain.GetPlainMessage();
-            if (s == "敲木鱼")
+            if (ChineseConverter.Convert(s, ChineseConversionDirection.TraditionalToSimplified) == "敲木鱼")
             {
                 long TimeNow = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
                 if (Json.FileExists("woodenfish") && Json.ObjectExistsInArray("woodenfish", "players", "playerid", receiver.Sender.Id))
@@ -40,8 +41,9 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                     switch ((int)item["ban"]!)
                     {
                         case 0:
+                            int[] add = new int[] { 1, 4, 5 };
                             Random r = new();
-                            int random = r.Next(1, 6);
+                            int random = r.Next(add.Length);
                             int hit_count;
                             long endtime;
                             if (TimeNow - (long)item["end_time"]! <= 3)
@@ -66,19 +68,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                                 Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "ee", (double)item["ee"]! * 0.5);
                                 Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "e", (double)item["e"]! * 0.5);
                                 Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "dt", TimeNow + 5400);
-                                MessageChain messageChain1 = new MessageChainBuilder()
-                                    .At(receiver.Sender.Id)
-                                    .Plain($" DoS佛祖是吧？这就给你封了（恼）（你被封禁 90 分钟，功德扣掉 50%）")
-                                    .Build();
-                                try
-                                {
-                                    await receiver.SendMessageAsync(messageChain1);
-                                }
-                                catch (Exception e)
-                                {
-                                    Logger.Error("群消息发送失败！");
-                                    Logger.Debug($"错误信息：\n{e.Message}");
-                                }
+                                await TrySend.Quote(receiver, "DoS佛祖是吧？这就给你封了（恼）（你被封禁 90 分钟，功德扣掉 50%）");
                             }
                             else if (TimeNow - (long)item["end_time"]! <= 3 && (int)item["hit_count"]! > 5 && (int)item["total_ban"]! >= 4)
                             {
@@ -88,68 +78,24 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                                 Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "gongde", 0);
                                 Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "ee", 0);
                                 Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "e", 0);
-                                Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "level", 0);
+                                Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "level", 1);
                                 Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "nirvana", 1);
-                                MessageChain messageChain1 = new MessageChainBuilder()
-                                    .At(receiver.Sender.Id)
-                                    .Plain($" 多次DoS佛祖，死不悔改，罪加一等（恼）（你被永久封禁，等级、涅槃值重置，功德清零）")
-                                    .Build();
-                                try
-                                {
-                                    await receiver.SendMessageAsync(messageChain1);
-                                }
-                                catch (Exception e)
-                                {
-                                    Logger.Error("群消息发送失败！");
-                                    Logger.Debug($"错误信息：\n{e.Message}");
-                                }
+                                await TrySend.Quote(receiver, "多次DoS佛祖，死不悔改，罪加一等（恼）（你被永久封禁，等级、涅槃值重置，功德清零）");
                             }
                             else
                             {
-                                Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "gongde", (int)item["gongde"]! + random);
-                                MessageChain messageChain1 = new MessageChainBuilder()
-                                    .At(receiver.Sender.Id)
-                                    .Plain($" 功德 +{random}")
-                                    .Build();
-                                try
-                                {
-                                    await receiver.SendMessageAsync(messageChain1);
-                                }
-                                catch (Exception e)
-                                {
-                                    Logger.Error("群消息发送失败！");
-                                    Logger.Debug($"错误信息：\n{e.Message}");
-                                }
+                                Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "gongde", (int)item["gongde"]! + add[random]);
+                                await TrySend.Quote(receiver, $" 功德 +{add[random]}");
                             }
                             break;
                         default:
-                            MessageChain messageChain = new MessageChainBuilder()
-                                .At(receiver.Sender.Id)
-                                .Plain(" 宁踏马被佛祖封号辣（恼）")
-                                .Build();
-                            try
-                            {
-                                await receiver.SendMessageAsync(messageChain);
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("群消息发送失败！");
-                                Logger.Debug($"错误信息：\n{e.Message}");
-                            }
+                            await TrySend.Quote(receiver, "敲拟吗呢？宁踏马被佛祖封号辣（恼）");
                             break;
                     }
                 }
                 else
                 {
-                    try
-                    {
-                        await receiver.SendMessageAsync("宁踏马害没注册？快发送“给我木鱼”注册罢！");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, "宁踏马害没注册？快发送“给我木鱼”注册罢！");
                 }
             }
         }

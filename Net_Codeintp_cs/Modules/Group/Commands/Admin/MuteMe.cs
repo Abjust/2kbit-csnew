@@ -32,99 +32,38 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Admin
             string[] s = receiver.MessageChain.GetPlainMessage().Split(" ");
             if (s[0] == "!muteme")
             {
+                int duration = 0;
                 switch (s.Length)
                 {
                     case 2:
                         if (int.TryParse(s[1], out int minutes) && minutes >= 1 && minutes <= 43199)
                         {
-                            try
-                            {
-                                await GroupManager.MuteAsync(receiver.Sender.Id, receiver.GroupId, minutes * 60);
-                                Logger.Info($"禁言操作已执行！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{receiver.Sender.Id}\n时长：{minutes} 分钟");
-                                try
-                                {
-                                    await receiver.SendMessageAsync($"已禁言 {receiver.Sender.Id}：{minutes} 分钟");
-                                }
-                                catch (Exception e)
-                                {
-                                    Logger.Error("群消息发送失败！");
-                                    Logger.Debug($"错误信息：\n{e.Message}");
-                                }
-                                break;
-                            }
-                            catch (Exception ex)
-                            {
-                                Logger.Info($"已尝试执行禁言操作，但是失败了！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{receiver.Sender.Id}\n时长：{minutes} 分钟");
-                                Logger.Debug($"错误详细：\n{ex.Message}");
-                                try
-                                {
-                                    await receiver.SendMessageAsync($"无法禁言 {receiver.Sender.Id}：请检查机器人和被执行者在群内的权限，以及提供的参数是否正确");
-                                }
-                                catch (Exception e)
-                                {
-                                    Logger.Error("群消息发送失败！");
-                                    Logger.Debug($"错误信息：\n{e.Message}");
-                                }
-                            }
-                        }
-                        else
-                        {
-                            Logger.Warning($"未尝试执行禁言操作，因为提供的参数有误！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                            try
-                            {
-                                await receiver.SendMessageAsync("参数错误");
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("群消息发送失败！");
-                                Logger.Debug($"错误信息：\n{e.Message}");
-                            }
-                            break;
+                            duration = minutes;
                         }
                         break;
                     case 1:
-                        try
-                        {
-                            await GroupManager.MuteAsync(receiver.Sender.Id, receiver.GroupId, 600);
-                            Console.WriteLine($"禁言操作已执行！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{receiver.Sender.Id}\n时长：10 分钟");
-                            try
-                            {
-                                await receiver.SendMessageAsync($"已禁言 {receiver.Sender.Id}：10 分钟");
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("群消息发送失败！");
-                                Logger.Debug($"错误信息：\n{e.Message}");
-                            }
-                            break;
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger.Error($"已尝试执行禁言操作，但是失败了！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{receiver.Sender.Id}\n时长：10 分钟");
-                            Logger.Debug($"错误详细：\n{ex.Message}");
-                            try
-                            {
-                                await receiver.SendMessageAsync($"无法禁言 {receiver.Sender.Id}：请检查机器人和被执行者在群内的权限，以及提供的参数是否正确");
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("群消息发送失败！");
-                                Logger.Debug($"错误信息：\n{e.Message}");
-                            }
-                        }
+                        duration = 10;
                         break;
-                    default:
-                        Logger.Warning($"未尝试执行禁言操作，因为提供的参数有误！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                        try
-                        {
-                            await receiver.SendMessageAsync("参数错误");
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.Error("群消息发送失败！");
-                            Logger.Debug($"错误信息：\n{e.Message}");
-                        }
-                        break;
+                }
+                if (duration != 0)
+                {
+                    try
+                    {
+                        await GroupManager.MuteAsync(receiver.Sender.Id, receiver.GroupId, duration * 60);
+                        Logger.Info($"禁言操作已执行！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{receiver.Sender.Id}\n时长：{duration} 分钟");
+                        await TrySend.Quote(receiver, $"已禁言 {receiver.Sender.Id}：{duration} 分钟");
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error($"已尝试执行禁言操作，但是失败了！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})\n被执行者：{receiver.Sender.Id}\n时长：{duration} 分钟");
+                        Logger.Debug($"错误详细：\n{ex.Message}");
+                        await TrySend.Quote(receiver, $"无法禁言 {receiver.Sender.Id}：机器人踏马的有权限？宁自己踏马的事群管？这让我怎么搞？（恼）");
+                    }
+                }
+                else
+                {
+                    Logger.Warning($"未尝试执行禁言操作，因为提供的参数有误！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
+                    await TrySend.Quote(receiver, "捏吗，参数有问题让我怎么执行？（恼）");
                 }
             }
         }

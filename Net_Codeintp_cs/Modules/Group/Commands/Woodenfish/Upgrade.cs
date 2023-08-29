@@ -13,6 +13,7 @@
 * 木鱼模块：升级木鱼
 **/
 
+using Microsoft.International.Converters.TraditionalChineseToSimplifiedConverter;
 using Mirai.Net.Data.Messages;
 using Mirai.Net.Data.Messages.Receivers;
 using Mirai.Net.Modules;
@@ -29,64 +30,96 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
         public async void Execute(MessageReceiverBase @base)
         {
             GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
-            string s = receiver.MessageChain.GetPlainMessage();
-            if (s == "升级木鱼")
+            string[] s = receiver.MessageChain.GetPlainMessage().Split(" ");
+            if (ChineseConverter.Convert(s[0], ChineseConversionDirection.TraditionalToSimplified) == "升级木鱼")
             {
                 if (Json.FileExists("woodenfish") && Json.ObjectExistsInArray("woodenfish", "players", "playerid", receiver.Sender.Id))
                 {
                     JObject obj = Json.ReadFile("woodenfish");
                     JObject item = (JObject)obj["players"]!.Where(x => x.SelectToken("playerid")!.Value<string>()! == receiver.Sender.Id).FirstOrDefault()!;
-                    if ((int)item["ban"]! == 0 && Math.Pow(10, (double)item["ee"]!) + (double)item["e"]! >= (int)item["level"]! + 2)
+                    int maxlevel = 200;
+                    if ((int)item["ban"]! == 0)
                     {
-                        if ((double)item["e"]! >= (int)item["level"]! + 2)
+                        if ((int)item["level"]! < maxlevel)
                         {
-                            Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "level", (int)item["level"]! + 1);
-                            Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "e", (double)item["e"]! - ((int)item["level"]! + 2));
-                            MessageChain messageChain = new MessageChainBuilder()
-                                        .At(receiver.Sender.Id)
-                                        .Plain(" 木鱼升级成功辣（喜）")
-                                        .Build();
-                            await receiver.SendMessageAsync(messageChain);
+                            int needed_e = 0;
+                            int upgrades = 0;
+                            switch (s.Length)
+                            {
+                                case 2:
+                                    if (int.TryParse(s[1], out int number))
+                                    {
+                                        upgrades = number;
+                                        if ((int)item["level"]! + number <= maxlevel)
+                                        {
+                                            for (int i = 0; i < number; i++)
+                                            {
+                                                needed_e += (int)item["level"]! + i - 1 + 2;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            await TrySend.Quote(receiver, "宁踏马再升级就超过满级辣（恼）");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        await TrySend.Quote(receiver, "宁看看，宁写的事数字？小学重读去罢（恼）");
+                                    }
+                                    break;
+                                case 1:
+                                    needed_e = (int)item["level"]! + 1;
+                                    upgrades = 1;
+                                    if (Math.Pow(10, (double)item["ee"]!) + (double)item["e"]! >= needed_e)
+                                    {
+                                        if ((double)item["e"]! >= needed_e)
+                                        {
+                                            Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "level", (int)item["level"]! + 1);
+                                            Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "e", (double)item["e"]! - needed_e);
+                                        }
+                                        else
+                                        {
+                                            Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "level", (int)item["level"]! + 1);
+                                            Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "ee", Math.Log10(Math.Pow(10, (double)item["ee"]!) + (double)item["e"]! - needed_e));
+                                        }
+                                    }
+                                    break;
+                                default:
+                                    await TrySend.Quote(receiver, "捏吗，参数有问题让我怎么执行？（恼）");
+                                    break;
+                            }
+                            if (needed_e != 0 && Math.Pow(10, (double)item["ee"]!) + (double)item["e"]! >= needed_e)
+                            {
+                                if ((double)item["e"]! >= needed_e)
+                                {
+                                    Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "level", (int)item["level"]! + upgrades);
+                                    Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "e", (double)item["e"]! - needed_e);
+                                }
+                                else
+                                {
+                                    Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "level", (int)item["level"]! + upgrades);
+                                    Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "ee", Math.Log10(Math.Pow(10, (double)item["ee"]!) + (double)item["e"]! - needed_e));
+                                }
+                                await TrySend.Quote(receiver, "木鱼升级成功辣（喜）");
+                            }
+                            else if (needed_e != 0 && Math.Pow(10, (double)item["ee"]!) + (double)item["e"]! < needed_e)
+                            {
+                                await TrySend.Quote(receiver, "宁踏马功德不够，升级个毛啊（恼）");
+                            }
                         }
                         else
                         {
-                            Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "level", (int)item["level"]! + 1);
-                            Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "ee", Math.Log10(Math.Pow(10, (double)item["ee"]!) + (double)item["e"]! - ((int)item["level"]! + 2)));
-                            MessageChain messageChain = new MessageChainBuilder()
-                                        .At(receiver.Sender.Id)
-                                        .Plain(" 木鱼升级成功辣（喜）")
-                                        .Build();
-                            await receiver.SendMessageAsync(messageChain);
+                            await TrySend.Quote(receiver, "宁踏马已经满级辣（恼）");
                         }
                     }
-                    else if ((int)item["ban"]! == 0 && Math.Pow(10, (double)item["ee"]!) + (double)item["e"]! < (int)item["level"]! - 1 + 2)
+                    else
                     {
-                        MessageChain messageChain = new MessageChainBuilder()
-                                .At(receiver.Sender.Id)
-                                .Plain(" 宁踏马功德不够，升级个毛啊（恼）")
-                                .Build();
-                        await receiver.SendMessageAsync(messageChain);
-                    }
-                    else if((int)item["ban"]! != 0)
-                    {
-                        MessageChain messageChain = new MessageChainBuilder()
-                                .At(receiver.Sender.Id)
-                                .Plain(" 宁踏马被佛祖封号辣（恼）")
-                                .Build();
-                        await receiver.SendMessageAsync(messageChain);
+                        await TrySend.Quote(receiver, "宁踏马被佛祖封号辣（恼）");
                     }
                 }
                 else
                 {
-                    try
-                    {
-                        await receiver.SendMessageAsync("宁踏马害没注册？快发送“给我木鱼”注册罢！");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, "宁踏马害没注册？快发送“给我木鱼”注册罢！");
                 }
             }
         }

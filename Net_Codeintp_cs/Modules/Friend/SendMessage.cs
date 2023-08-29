@@ -77,7 +77,7 @@ namespace Net_Codeintp_cs.Modules.Friend
             }
             else if (receiver.FriendId == BotMain.OwnerQQ && receiver.MessageChain.GetPlainMessage() == "!reply")
             {
-                if (LastMessageFrom != null)
+                if (LastMessageFrom is not null)
                 {
                     await MessageManager.SendFriendMessageAsync(BotMain.OwnerQQ, "请输入要回复的内容！（若要取消发送，请在聊天框中输入!cancel）");
                     Target = LastMessageFrom;

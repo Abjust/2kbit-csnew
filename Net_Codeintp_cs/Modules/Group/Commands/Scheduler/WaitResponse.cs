@@ -44,30 +44,14 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Scheduler
                     Logger.Info($"已取消新建或者修改定时任务！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
                     if (receiver.MessageChain.GetPlainMessage() == "!cancel")
                     {
-                        try
-                        {
-                            await receiver.SendMessageAsync("已取消新建或者修改定时任务！");
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.Error("群消息发送失败！");
-                            Logger.Debug($"错误信息：\n{e.Message}");
-                        }
+                        await TrySend.Quote(receiver, "已取消新建或者修改定时任务！");
                     }
                 }
                 else if (Modifying)
                 {
                     Logger.Info($"已修改定时任务！\n任务ID：{TaskId!}\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
                     Json.ModifyObjectFromArray("schedules", "schedules", "taskid", TaskId!, "message", receiver.MessageChain.MiraiCode);
-                    try
-                    {
-                        await receiver.SendMessageAsync($"已修改ID为 {TaskId!} 的定时任务！");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, $"已修改ID为 {TaskId!} 的定时任务！");
                 }
                 else
                 {
@@ -90,15 +74,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Scheduler
                     Json.AddObjectToArray("schedules", "schedules", obj);
                     Logger.Info($"已新建定时任务！\n任务ID：{taskid}\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
                     await Schedules.Initialize();
-                    try
-                    {
-                        await receiver.SendMessageAsync($"已新建定时任务！其任务ID为：{taskid}");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, $"已新建定时任务！其任务ID为：{taskid}");
                 }
                 WaitingResponse = false;
                 Modifying = false;

@@ -61,7 +61,9 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Bread
                         new JProperty("exp_gained_today", 0),
                         new JProperty("last_expfull", 946656000),
                         new JProperty("last_expgain", 946656000),
-                        new JProperty("last_produce", TimeNow)
+                        new JProperty("last_produce", TimeNow),
+                        new JProperty("next_expiry", TimeNow - (TimeNow + 8 * 3600) % 86400 + 259200),
+                        new JProperty("expiration", 3)
                         );
                     Json.AddObjectToArray("breadfactory", "groups", obj);
                     JObject obj1 = new(
@@ -69,32 +71,17 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Bread
                         new JProperty("flour", 0),
                         new JProperty("egg", 0),
                         new JProperty("yeast", 0),
-                        new JProperty("last_produce", TimeNow)
+                        new JProperty("last_produce", TimeNow),
+                        new JProperty("next_expiry", TimeNow - (TimeNow + 8 * 3600) % 86400 + 259200)
                         );
                     Json.AddObjectToArray("materials", "groups", obj1);
                     Logger.Info($"已为地区“{receiver.GroupName} ({receiver.GroupId})”兴建面包厂！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                    try
-                    {
-                        await receiver.SendMessageAsync("成功为本群建造面包厂！");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, "成功为本群建造面包厂！");
                 }
                 else
                 {
                     Logger.Warning($"未尝试为地区“{receiver.GroupName} ({receiver.GroupId})”兴建面包厂，因为该地区已有面包厂！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
-                    try
-                    {
-                        await receiver.SendMessageAsync("本群已经有面包厂了！");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, "这b群踏马已经有面包厂了（恼）");
                 }
             }
         }

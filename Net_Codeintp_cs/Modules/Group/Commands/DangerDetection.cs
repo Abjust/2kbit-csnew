@@ -89,19 +89,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
                                 };
                     Random r = new();
                     int random = r.Next(poems.Count);
-                    MessageChain messageChain = new MessageChainBuilder()
-                        .At(receiver.Sender.Id)
-                        .Plain(poems[random])
-                        .Build();
-                    try
-                    {
-                        await receiver.QuoteMessageAsync(messageChain);
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, poems[random]);
                 }
             }
         }

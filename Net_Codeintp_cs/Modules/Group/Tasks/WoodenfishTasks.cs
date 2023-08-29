@@ -8,16 +8,13 @@
 
 // 您应该已经收到了一份GNU Affero通用公共许可证的副本。 如果没有，请参见<https://www.gnu.org/licenses/>。
 
-
-
-using Net_Codeintp_cs.Modules.Utils;
-
-
-using Newtonsoft.Json.Linq;
 /**
  * 2kbit C# Edition: New
  * 木鱼伪自动任务
 **/
+
+using Net_Codeintp_cs.Modules.Utils;
+using Newtonsoft.Json.Linq;
 
 namespace Net_Codeintp_cs.Modules.Group.Tasks
 {
@@ -28,18 +25,32 @@ namespace Net_Codeintp_cs.Modules.Group.Tasks
             long TimeNow = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
             JObject obj = Json.ReadFile("woodenfish");
             JObject p = (JObject)obj["players"]!.Where(x => x.SelectToken("playerid")!.Value<string>()! == playerid).FirstOrDefault()!;
-            double cyclespeed = (int)Math.Ceiling(60 * Math.Pow(0.98, (int)p["level"]! - 1));
-            Logger.Debug(cyclespeed);
+            double cyclespeed = (int)Math.Ceiling(60 * Math.Pow(0.978, (int)p["level"]! - 1));
             if ((int)p["ban"]! == 0 && TimeNow - (long)p["time"]! >= (int)Math.Ceiling((double)cyclespeed))
             {
                 double e = (double)p["e"]!;
-                int cycles = Math.Min(12 + (int)Math.Floor(((double)p["nirvana"]! - 1) / 0.05), (int)Math.Floor((TimeNow - (long)p["time"]!) / Math.Ceiling(cyclespeed)));
+                int cycles = Math.Min(12 + (int)p["level"]! - 1, (int)Math.Floor((TimeNow - (long)p["time"]!) / Math.Ceiling(cyclespeed)));
+                int actual_cycles = Math.Min(cycles, 120);
                 for (int i = 0; i < cycles; i++)
                 {
-                    e = (e * Math.Pow(Math.Sqrt(Math.E), (double)p["nirvana"]!)) + Math.Log10((int)p["level"]!);
+                    if (i >= actual_cycles || e >= 200)
+                    {
+                        continue;
+                    }
+                    e = Math.Log10((Math.Pow(10, e) + (int)p["gongde"]!) * Math.Pow(Math.E, (double)p["nirvana"]!) + (int)p["level"]!);
                 }
-                Json.ModifyObjectFromArray("woodenfish", "players", "playerid", playerid, "e", e);
-                Json.ModifyObjectFromArray("woodenfish", "players", "playerid", playerid, "time", TimeNow - (long)((TimeNow - (long)p["time"]!) % Math.Ceiling(cyclespeed)));
+                Logger.Debug(e);
+                if (e >= 6)
+                {
+                    Json.ModifyObjectFromArray("woodenfish", "players", "playerid", playerid, "e", e);
+                    Json.ModifyObjectFromArray("woodenfish", "players", "playerid", playerid, "gongde", 0);
+                    Json.ModifyObjectFromArray("woodenfish", "players", "playerid", playerid, "time", TimeNow - (long)((TimeNow - (long)p["time"]!) % Math.Ceiling(cyclespeed)));
+                }
+                else
+                {
+                    Json.ModifyObjectFromArray("woodenfish", "players", "playerid", playerid, "gongde", (int)Math.Round(Math.Pow(10, e)));
+                    Json.ModifyObjectFromArray("woodenfish", "players", "playerid", playerid, "time", TimeNow - (long)((TimeNow - (long)p["time"]!) % Math.Ceiling(cyclespeed)));
+                }
             }
         }
     }

@@ -30,27 +30,11 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
             GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
             if (receiver.MessageChain.GetPlainMessage() == "菜单" || receiver.MessageChain.GetPlainMessage() == "!menu")
             {
-                try
-                {
-                    await receiver.SendMessageAsync("请前往 https://2kbit.otherworld.icu 查看 2kbit C# Edition: New 使用教程！");
-                }
-                catch (Exception e)
-                {
-                    Logger.Error("群消息发送失败！");
-                    Logger.Debug($"错误信息：\n{e.Message}");
-                }
+                await TrySend.Quote(receiver, "请前往 https://2kbit.otherworld.icu 查看 2kbit C# Edition: New 使用教程！");
             }
             else if (receiver.MessageChain.GetPlainMessage().StartsWith("!help"))
             {
-                try
-                {
-                    await receiver.SendMessageAsync("请前往 https://2kbit.otherworld.icu 查看 2kbit C# Edition: New 使用教程！");
-                }
-                catch (Exception e)
-                {
-                    Logger.Error("群消息发送失败！");
-                    Logger.Debug($"错误信息：\n{e.Message}");
-                }
+                await TrySend.Quote(receiver, "请前往 https://2kbit.otherworld.icu 查看 2kbit C# Edition: New 使用教程！");
             }
         }
     }

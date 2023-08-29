@@ -36,8 +36,10 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Bread
             {
                 if (Json.FileExists("breadfactory") && Json.FileExists("materials") && Json.ObjectExistsInArray("breadfactory", "groups", "groupid", receiver.GroupId))
                 {
-                    int flour = 0, egg = 0, yeast = 0;
+                    FactoryExpiration.Execute(receiver.GroupId);
                     MaterialsFactory.Produce(receiver.GroupId);
+                    BreadFactory.Produce(receiver.GroupId);
+                    int flour = 0, egg = 0, yeast = 0;
                     JObject obj = Json.ReadFile("materials");
                     foreach (JObject item in ((JArray)obj["groups"]!).Cast<JObject>())
                     {
@@ -49,10 +51,10 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Bread
                             break;
                         }
                     }
-                    BreadFactory.Produce(receiver.GroupId);
                     obj = Json.ReadFile("breadfactory");
                     bool is_maxlevel = false;
                     string mode = "";
+                    string expiry;
                     foreach (JObject item in ((JArray)obj["groups"]!).Cast<JObject>())
                     {
                         if ((string)item["groupid"]! == receiver.GroupId)
@@ -76,51 +78,46 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Bread
                                     mode = "单一化供应";
                                     break;
                             }
-                            MessageChain messageChain = new MessageChainBuilder()
-                                    .At(receiver.Sender.Id)
-                                    .Plain($@"
-本群 ({receiver.GroupId}) 面包厂信息如下：
------面包厂属性-----
+                            expiry = (int)item["expiration"]! switch
+                            {
+                                >= 1 => $"{(int)item["expiration"]!} 天",
+                                _ => "永不过期",
+                            };
+                            string properties = @$"
 面包厂等级：{(int)item["factory_level"]!} / {breadfactory_maxlevel} 级
 面包厂经验：{(int)item["factory_exp"]!} XP
 今日已获得经验：{(int)item["exp_gained_today"]!} / {(int)(300 * Math.Pow(2, (int)item["factory_level"]! - 1))} XP
-生产（供应）模式：{mode}
------面包厂配置-----
-面包库存上限：{(int)(64 * Math.Pow(4, (int)item["factory_level"]! - 1)) * Math.Pow(2, (int)item["storage_level"]!)} 块
-生产周期：{300 - 20 * ((int)item["factory_level"]! - 1) - 10 * (int)item["speed_level"]!} 秒
-每周期最大产量：{(int)Math.Pow(4, (int)item["factory_level"]!) * (int)Math.Pow(2, (int)item["output_level"]!)} 块
------物品库存-----
-现有原材料：{flour} 份面粉、{egg} 份鸡蛋、{yeast} 份酵母
-现有面包：{(int)item["breads"]!} / {(int)(64 * Math.Pow(4, (int)item["factory_level"]! - 1)) * Math.Pow(2, (int)item["storage_level"]!)} 块
-")
-                                    .Build();
+生产（供应）模式：{mode}";
                             if (is_maxlevel)
                             {
-                                messageChain = new MessageChainBuilder()
-                                    .At(receiver.Sender.Id)
-                                    .Plain($@"
-本群 ({receiver.GroupId}) 面包厂信息如下：
------面包厂属性-----
+                                properties = @$"
 面包厂等级： {breadfactory_maxlevel} 级（满级）
 库存升级次数：{(int)item["storage_level"]!} 次
 生产速度升级次数：{(int)item["speed_level"]!} 次
 产量升级次数：{(int)item["output_level"]!} 次
 面包厂经验：{(int)item["factory_exp"]!} XP
 今日已获得经验：{(int)item["exp_gained_today"]!} / {(int)(300 * Math.Pow(2, (int)item["factory_level"]! - 1))} XP
-生产（供应）模式：{mode}
+生产（供应）模式：{mode}";
+                            }
+                            MessageChain messageChain = new MessageChainBuilder()
+                                    .At(receiver.Sender.Id)
+                                    .Plain($@"
+本群 ({receiver.GroupId}) 面包厂信息如下：
+-----面包厂属性-----
+{properties.Trim()}
 -----面包厂配置-----
 面包库存上限：{(int)(64 * Math.Pow(4, (int)item["factory_level"]! - 1)) * Math.Pow(2, (int)item["storage_level"]!)} 块
 生产周期：{300 - 20 * ((int)item["factory_level"]! - 1) - 10 * (int)item["speed_level"]!} 秒
 每周期最大产量：{(int)Math.Pow(4, (int)item["factory_level"]!) * (int)Math.Pow(2, (int)item["output_level"]!)} 块
+批次保质期：{expiry}
 -----物品库存-----
 现有原材料：{flour} 份面粉、{egg} 份鸡蛋、{yeast} 份酵母
 现有面包：{(int)item["breads"]!} / {(int)(64 * Math.Pow(4, (int)item["factory_level"]! - 1)) * Math.Pow(2, (int)item["storage_level"]!)} 块
 ")
                                     .Build();
-                            }
                             try
                             {
-                                await receiver.SendMessageAsync(messageChain);
+                                await receiver.QuoteMessageAsync(messageChain);
                                 Logger.Info($"已提供分厂“{receiver.GroupName} ({receiver.GroupId})”的完整信息！");
                             }
                             catch (Exception e)
@@ -135,15 +132,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Bread
                 else
                 {
                     Logger.Warning($"未能提供地区“{receiver.GroupName} ({receiver.GroupId})”的分厂信息，因为该地区尚未兴建面包厂！");
-                    try
-                    {
-                        await receiver.SendMessageAsync("本群还没有面包厂！");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("群消息发送失败！");
-                        Logger.Debug($"错误信息：\n{e.Message}");
-                    }
+                    await TrySend.Quote(receiver, "这b群，踏马连个面包厂都没有（恼）");
                 }
             }
         }
