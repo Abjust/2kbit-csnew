@@ -27,6 +27,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
 
         public async void Execute(MessageReceiverBase @base)
         {
+            // HTTP响应码列表
             List<string> codes = new()
                         {
                             "100",
@@ -67,6 +68,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
                             "503",
                             "504"
                         };
+            // HTTP响应码对应的解释列表
             List<string> explanations = new()
                         {
                             "100 Continue\n服务器已经接收到请求头，并且客户端应继续发送请求主体（在需要发送身体的请求的情况下：例如，POST请求），或者如果请求已经完成，忽略这个响应。",

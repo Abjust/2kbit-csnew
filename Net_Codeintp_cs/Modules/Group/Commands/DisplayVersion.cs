@@ -30,6 +30,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
             GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
             if (receiver.MessageChain.GetPlainMessage() == "版本")
             {
+                // 标语列表
                 List<string> splashes = new()
                         {
                             "也试试KuoHuBit罢！Also try KuoHuBit!",
@@ -53,16 +54,9 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
                             "使用C#编写！"
                         };
                 Random r = new();
+                // 随机选择一条标语
                 int random = r.Next(splashes.Count);
-                try
-                {
-                    await TrySend.Quote(receiver, $"\n机器人版本：2kbit C# Edition: New b1.3.0\n上次更新日期：2023/8/29\n更新内容：代码大幅度重构；结束木鱼恶性通胀\n---------\n{splashes[random]}");
-                }
-                catch (Exception e)
-                {
-                    Logger.Error("群消息发送失败！");
-                    Logger.Debug($"错误信息：\n{e.Message}");
-                }
+                await TrySend.Quote(receiver, $"\n机器人版本：2kbit C# Edition: New b1.3.1\n上次更新日期：2023/8/31\n更新内容：啥也没更新（？）\n---------\n{splashes[random]}");
             }
         }
     }

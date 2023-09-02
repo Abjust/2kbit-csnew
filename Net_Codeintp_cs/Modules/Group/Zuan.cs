@@ -25,6 +25,7 @@ namespace Net_Codeintp_cs.Modules.Group
     {
         public static async void Execute(string group, string target)
         {
+            // 词库
             string[] words =
                             {
                                  "cnmd",
@@ -57,11 +58,14 @@ namespace Net_Codeintp_cs.Modules.Group
                                  "握草泥马呀—\r\n我操尼玛啊啊啊啊—\r\n我—操—你—妈—\r\n听到没，我—操—你—妈—"
                             };
             Random r = new();
+            // 是否拉取API
             bool fetch = r.Next(2) == 1;
             int index = r.Next(words.Length);
             string word = "";
+            // 如果要拉取API
             if (fetch)
             {
+                // API列表
                 List<string> apis = new()
                 {
                     "https://api.qhsou.com/api/zuan.php",
@@ -69,6 +73,7 @@ namespace Net_Codeintp_cs.Modules.Group
                 };
                 Random r1 = new();
                 int api_index = r.Next(apis.Count);
+                // 拉取API
                 try
                 {
                     RestClient client = new(apis[api_index]);
@@ -77,15 +82,17 @@ namespace Net_Codeintp_cs.Modules.Group
                         Timeout = 10000
                     };
                     RestResponse response = await client.ExecuteAsync(request);
-                    word = response.Content!;
+                    word = response.Content!.Trim();
                 }
                 catch (Exception e)
                 {
                     Logger.Error("API拉取失败！（将使用现有词库）");
                     Logger.Debug($"错误信息：\n{e.Message}");
+                    // 如果API拉取失败，就退回到词库
                     word = words[index];
                 }
             }
+            // 否则使用词库
             else
             {
                 word = words[index];

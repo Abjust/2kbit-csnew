@@ -81,8 +81,8 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Admin
 禁言时长：{vote.Duration} 分钟
 目前票数：{yes} : {no}
 结束时间：{TimeZoneInfo.ConvertTime(time, TimeZoneInfo.FindSystemTimeZoneById("China Standard Time"))}
------\n
-".Trim())
+-----
+")
                                         .Build();
                                     foreach (MessageBase message in messageChain1)
                                     {

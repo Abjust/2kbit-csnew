@@ -38,6 +38,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Scheduler
                             {
                                 switch (s[1])
                                 {
+                                    // 新建全局定时任务
                                     case "all":
                                         switch (Permission.IsGlobalAdmin(receiver.Sender.Id))
                                         {
@@ -50,6 +51,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Scheduler
                                                 break;
                                         }
                                         break;
+                                    // 新建本群定时任务
                                     case "this":
                                         switch (Permission.IsGroupAdmin(receiver.GroupId, receiver.Sender.Id))
                                         {

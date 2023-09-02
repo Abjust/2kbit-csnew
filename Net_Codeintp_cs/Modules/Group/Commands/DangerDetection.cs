@@ -17,17 +17,18 @@ using Mirai.Net.Data.Messages;
 using Mirai.Net.Data.Messages.Receivers;
 using Mirai.Net.Modules;
 using Mirai.Net.Utils.Scaffolds;
-using Net_Codeintp_cs.Modules.Utils;
 
 namespace Net_Codeintp_cs.Modules.Group.Commands
 {
+    [Obsolete("因假阳性和假阴性问题，危机预警模块已不再使用", true)]
     internal class DangerDetection : IModule
     {
         public bool? IsEnable { get; set; }
 
-        public async void Execute(MessageReceiverBase @base)
+        public void Execute(MessageReceiverBase @base)
         {
             GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
+            // 可疑词汇列表
             List<string> words = new()
                         {
                             "我想自杀",
@@ -49,8 +50,10 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
 
             foreach (string word in words)
             {
+                // 如果消息中包含可疑词汇
                 if (receiver.MessageChain.GetPlainMessage().ToLower().Contains(word))
                 {
+                    // 诗句列表
                     List<string> poems = new()
                                 {
                                     @"
@@ -87,9 +90,11 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
 把无限握在自己手心。",
                                     " 天若有情人亦老，人间正道是沧桑。"
                                 };
+                    /**
                     Random r = new();
                     int random = r.Next(poems.Count);
                     await TrySend.Quote(receiver, poems[random]);
+                    **/
                 }
             }
         }

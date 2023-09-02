@@ -39,6 +39,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Scheduler
             GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
             if (WaitingResponse == true && receiver.Sender.Id == Executor)
             {
+                // 如果输入的是 !cancel 或者已经超时，则取消新建或者修改定时任务
                 if (receiver.MessageChain.GetPlainMessage() == "!cancel" || TimeNow >= WaitUntil)
                 {
                     Logger.Info($"已取消新建或者修改定时任务！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
@@ -57,6 +58,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Scheduler
                 {
                     Random random = new();
                     int taskid = random.Next(100000, 1000000);
+                    // 防止任务ID重复
                     while (Json.ObjectExistsInArray("schedules", "schedules", "taskid", taskid.ToString()))
                     {
                         taskid = random.Next(100000, 1000000);
@@ -76,6 +78,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Scheduler
                     await Schedules.Initialize();
                     await TrySend.Quote(receiver, $"已新建定时任务！其任务ID为：{taskid}");
                 }
+                // 重置所有变量
                 WaitingResponse = false;
                 Modifying = false;
             }

@@ -17,37 +17,51 @@ namespace Net_Codeintp_cs.Modules.Utils
 {
     internal class Permission
     {
+        // 管理员列表
         public static List<string>? Ops { get; set; }
+        // 全局管理员列表
         public static List<string>? OpsGlobal { get; set; }
+        // 黑名单列表
         public static List<string>? Blocklist { get; set; }
+        // 全局黑名单列表
         public static List<string>? BlocklistGlobal { get; set; }
+        // 灰名单列表
         public static List<string>? Ignores { get; set; }
+        // 全局灰名单列表
         public static List<string>? IgnoresGlobal { get; set; }
+        // 免打扰群列表
         public static List<string>? OptedOut { get; set; }
+        // 是否为全局机器人管理员
         public static bool IsGlobalAdmin(string qq)
         {
             return OpsGlobal!.Contains(qq);
         }
+        // 是否为群机器人管理员
         public static bool IsGroupAdmin(string groupid, string qq)
         {
             return Ops!.Contains($"{groupid}_{qq}") || IsGlobalAdmin(qq);
         }
+        // 是否为全局黑名单
         public static bool IsBlockedGlobal(string qq)
         {
             return BlocklistGlobal!.Contains(qq);
         }
+        // 是否为群黑名单
         public static bool IsBlocked(string groupid, string qq)
         {
             return Blocklist!.Contains($"{groupid}_{qq}") || IsBlockedGlobal(qq);
         }
+        // 是否为全局灰名单
         public static bool IsIgnoredGlobal(string qq)
         {
             return IgnoresGlobal!.Contains(qq);
         }
+        // 是否为群灰名单
         public static bool IsIgnored(string groupid, string qq)
         {
             return Ignores!.Contains($"{groupid}_{qq}") || IsIgnoredGlobal(qq);
         }
+        // 是否为免打扰群
         public static bool IsOptedOut(string groupid)
         {
             return OptedOut!.Contains(groupid);

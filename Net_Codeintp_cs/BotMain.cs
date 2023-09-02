@@ -54,6 +54,7 @@ namespace Net_Codeintp_cs
             }
             else
             {
+                // 读取配置文件
                 try
                 {
                     foreach (string line in System.IO.File.ReadLines("config.txt"))
@@ -102,7 +103,7 @@ namespace Net_Codeintp_cs
             }
             // 初始化权限
             Modules.Group.Commands.Admin.Update.Do();
-            // 初始化排除
+            // 初始化免打扰群列表
             Modules.Group.Commands.Choice.Update.Do();
             // 初始化bot
             MiraiBot bot = new();
@@ -148,18 +149,8 @@ namespace Net_Codeintp_cs
             .OfType<NewInvitationRequestedEvent>()
             .Subscribe(async e =>
             {
-                if (e.FromId is not null)
-                {
-                    // 同意邀请
-                    await RequestManager.HandleNewInvitationRequestedAsync(e, NewInvitationRequestHandlers.Approve, "");
-                    Logger.Info("机器人已同意加入 " + e.GroupId);
-                }
-                else
-                {
-                    // 拒绝邀请
-                    await RequestManager.HandleNewInvitationRequestedAsync(e, NewInvitationRequestHandlers.Reject, "你不是机器人主人");
-                    Logger.Info("机器人已拒绝加入 " + e.GroupId);
-                }
+                await RequestManager.HandleNewInvitationRequestedAsync(e, NewInvitationRequestHandlers.Approve, "");
+                Logger.Info("机器人已同意加入 " + e.GroupId);
             });
             // 侦测加群请求
             bot.EventReceived

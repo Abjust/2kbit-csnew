@@ -46,12 +46,14 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                             int random = r.Next(add.Length);
                             int hit_count;
                             long endtime;
+                            // 如果上次敲木鱼时间距离现在不到3秒
                             if (TimeNow - (long)item["end_time"]! <= 3)
                             {
                                 Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "hit_count", (int)item["hit_count"]! + 1);
                                 hit_count = (int)item["hit_count"]! + 1;
                                 endtime = (long)item["end_time"]!;
                             }
+                            // 如果上次敲木鱼时间距离现在超过3秒
                             else
                             {
                                 Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "end_time", TimeNow);
@@ -59,6 +61,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                                 hit_count = 1;
                                 endtime = TimeNow;
                             }
+                            // 如果3秒内敲木鱼次数超过5次，且封禁次数小于4次
                             if (TimeNow - endtime <= 3 && hit_count > 5 && (int)item["total_ban"]! < 4)
                             {
                                 Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "ban", 2);
@@ -70,6 +73,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                                 Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "dt", TimeNow + 5400);
                                 await TrySend.Quote(receiver, "DoS佛祖是吧？这就给你封了（恼）（你被封禁 90 分钟，功德扣掉 50%）");
                             }
+                            // 如果3秒内敲木鱼次数超过5次，且封禁次数大于等于4次
                             else if (TimeNow - (long)item["end_time"]! <= 3 && (int)item["hit_count"]! > 5 && (int)item["total_ban"]! >= 4)
                             {
                                 Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "ban", 1);

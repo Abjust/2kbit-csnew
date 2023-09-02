@@ -28,6 +28,7 @@ namespace Net_Codeintp_cs.Modules.Group
         {
             GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
             string[] s = receiver.MessageChain.MiraiCode.Trim().Split(" ");
+            // 如果at了bot
             if (s.Length >= 2 && s[0] == $"[mirai:at:{BotMain.BotQQ}]")
             {
                 Zuan.Execute(receiver.GroupId, receiver.Sender.Id);

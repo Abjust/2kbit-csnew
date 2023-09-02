@@ -23,6 +23,7 @@ using Quartz.Impl;
 
 namespace Net_Codeintp_cs.Modules.Group.Tasks
 {
+    // 单群定时任务
     internal class Schedule : IJob
     {
         public async Task Execute(IJobExecutionContext context)
@@ -41,18 +42,21 @@ namespace Net_Codeintp_cs.Modules.Group.Tasks
             }
         }
     }
-
+    // 全局定时任务
     internal class ScheduleAll : IJob
     {
         public async Task Execute(IJobExecutionContext context)
         {
             string message = context.MergedJobDataMap.GetString("message")!;
             Logger.Info("已开始执行全局定时任务！");
+            // 获取所有群
             IEnumerable<Mirai.Net.Data.Shared.Group> groups = AccountManager.GetGroupsAsync().GetAwaiter().GetResult();
             foreach (Mirai.Net.Data.Shared.Group group in groups)
             {
+                // 判断是否为免打扰群
                 if (!Permission.IsOptedOut(group.Id))
                 {
+                    // 发送消息
                     try
                     {
                         await group.SendGroupMessageAsync(new MiraiCodeMessage(message));

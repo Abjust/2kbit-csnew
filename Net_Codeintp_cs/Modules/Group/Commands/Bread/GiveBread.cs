@@ -35,12 +35,14 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Bread
             {
                 if (Json.FileExists("breadfactory") && Json.FileExists("materials") && Json.ObjectExistsInArray("breadfactory", "groups", "groupid", receiver.GroupId))
                 {
+                    // 执行自动化任务
                     FactoryExpiration.Execute(receiver.GroupId);
                     MaterialsFactory.Produce(receiver.GroupId);
                     BreadFactory.Produce(receiver.GroupId);
                     JObject obj = Json.ReadFile("breadfactory");
                     JObject item = (JObject)obj["groups"]!.Where(x => x.SelectToken("groupid")!.Value<string>()! == receiver.GroupId).FirstOrDefault()!;
                     int supplied_breads = 0;
+                    // 判断面包厂供应模式
                     if ((string)item["factory_mode"]! == "normal")
                     {
                         switch (s.Length)
@@ -64,16 +66,20 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Bread
                                 await TrySend.Quote(receiver, "捏吗，参数有问题让我怎么执行？（恼）");
                                 break;
                         }
-                        if ((int)item["breads"]! + supplied_breads <= (int)(64 * Math.Pow(4, (int)item["factory_level"]! - 1) * Math.Pow(2, (int)item["storage_level"]!)))
+                        if (supplied_breads > 0)
                         {
-                            Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", receiver.GroupId, "breads", (int)item["breads"]! + supplied_breads);
-                            Logger.Info($"有面包厂接收了 {supplied_breads} 块面包，现在该分厂仓库有 {(int)item["breads"]! + supplied_breads} 块面包！\n分厂：{receiver.GroupName} ({receiver.GroupId})");
-                            await TrySend.Quote(receiver, $"现在库存有 {(int)item["breads"]! + supplied_breads} 块面包辣！");
-                        }
-                        else
-                        {
-                            Logger.Warning($"有面包厂未能接收 {supplied_breads} 块面包，因为该分厂仓库已满！\n分厂：{receiver.GroupName} ({receiver.GroupId})");
-                            await TrySend.Quote(receiver, "库存满了就不要塞面包进来了，老蝉（恼）");
+                            // 判断面包厂库存是否已满
+                            if ((int)item["breads"]! + supplied_breads <= (int)(64 * Math.Pow(4, (int)item["factory_level"]! - 1) * Math.Pow(2, (int)item["storage_level"]!)))
+                            {
+                                Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", receiver.GroupId, "breads", (int)item["breads"]! + supplied_breads);
+                                Logger.Info($"有面包厂接收了 {supplied_breads} 块面包，现在该分厂仓库有 {(int)item["breads"]! + supplied_breads} 块面包！\n分厂：{receiver.GroupName} ({receiver.GroupId})");
+                                await TrySend.Quote(receiver, $"现在库存有 {(int)item["breads"]! + supplied_breads} 块面包辣！");
+                            }
+                            else
+                            {
+                                Logger.Warning($"有面包厂未能接收 {supplied_breads} 块面包，因为该分厂仓库已满！\n分厂：{receiver.GroupName} ({receiver.GroupId})");
+                                await TrySend.Quote(receiver, "库存满了就不要塞面包进来了，老蝉（恼）");
+                            }
                         }
                     }
                 }

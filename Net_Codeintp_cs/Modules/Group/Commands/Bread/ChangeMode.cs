@@ -36,6 +36,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Bread
                 {
                     JObject obj = Json.ReadFile("breadfactory");
                     JObject item = (JObject)obj["groups"]!.Where(x => x.SelectToken("groupid")!.Value<string>()! == receiver.GroupId).FirstOrDefault()!;
+                    // 判断是否为无限供应模式
                     if (((string)item["factory_mode"]!).Contains("infinite"))
                     {
                         switch (s[1])

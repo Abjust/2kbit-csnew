@@ -29,8 +29,10 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
         async void IModule.Execute(MessageReceiverBase @base)
         {
             GroupMessageReceiver receiver = @base.Concretize<GroupMessageReceiver>();
+            // 如果消息以 !echo 开头且消息链长度大于等于 2
             if (receiver.MessageChain.GetPlainMessage().StartsWith("!echo") && receiver.MessageChain.Count >= 2)
             {
+                // 如果要复述的消息的第一部分不包含“echo”
                 try
                 {
                     if (!receiver.MessageChain.MiraiCode.Replace("!echo ", "").Split(" ")[0].Contains("echo"))
@@ -46,6 +48,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
                             Logger.Debug($"\n错误信息：\n{e.Message}");
                         }
                     }
+                    // 如果要复述的消息的第一部分包含“echo”
                     else
                     {
                         Logger.Warning($"未尝试复述文本，因为这条请求有递归执行的嫌疑！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
@@ -57,6 +60,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
                     Logger.Debug($"\n错误信息：\n{e.Message}");
                 }
             }
+            // 如果消息以 !echo 开头但消息链长度小于 2
             else if (receiver.MessageChain.GetPlainMessage().StartsWith("!echo"))
             {
                 Logger.Warning($"未尝试复述文本，因为提供的参数有误！\n群：{receiver.GroupName} ({receiver.GroupId})\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");

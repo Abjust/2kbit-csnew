@@ -22,14 +22,19 @@ namespace Net_Codeintp_cs.Modules.Group.Tasks
     {
         public static void GetExp(string playerid)
         {
+            // 获取当前时间戳
             long TimeNow = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+            // 获取玩家数据
             JObject obj = Json.ReadFile("woodenfish");
             JObject p = (JObject)obj["players"]!.Where(x => x.SelectToken("playerid")!.Value<string>()! == playerid).FirstOrDefault()!;
             double cyclespeed = (int)Math.Ceiling(60 * Math.Pow(0.978, (int)p["level"]! - 1));
+            // 如果玩家没有被封禁且时间超过了一个周期，那么就给玩家增加功德
             if ((int)p["ban"]! == 0 && TimeNow - (long)p["time"]! >= (int)Math.Ceiling((double)cyclespeed))
             {
                 double e = (double)p["e"]!;
+                int gongde = 0;
                 int cycles = Math.Min(12 + (int)p["level"]! - 1, (int)Math.Floor((TimeNow - (long)p["time"]!) / Math.Ceiling(cyclespeed)));
+                // 限制最大增长轮数为120轮
                 int actual_cycles = Math.Min(cycles, 120);
                 for (int i = 0; i < cycles; i++)
                 {
@@ -37,20 +42,15 @@ namespace Net_Codeintp_cs.Modules.Group.Tasks
                     {
                         continue;
                     }
+                    // 木鱼的功德增长公式
                     e = Math.Log10((Math.Pow(10, e) + (int)p["gongde"]!) * Math.Pow(Math.E, (double)p["nirvana"]!) + (int)p["level"]!);
+                    // 使用e值的零头来增长原始功德
+                    gongde += (int)Math.Round(Math.Pow(10, e - Math.Floor(e)));
                 }
-                Logger.Debug(e);
-                if (e >= 6)
-                {
-                    Json.ModifyObjectFromArray("woodenfish", "players", "playerid", playerid, "e", e);
-                    Json.ModifyObjectFromArray("woodenfish", "players", "playerid", playerid, "gongde", 0);
-                    Json.ModifyObjectFromArray("woodenfish", "players", "playerid", playerid, "time", TimeNow - (long)((TimeNow - (long)p["time"]!) % Math.Ceiling(cyclespeed)));
-                }
-                else
-                {
-                    Json.ModifyObjectFromArray("woodenfish", "players", "playerid", playerid, "gongde", (int)Math.Round(Math.Pow(10, e)));
-                    Json.ModifyObjectFromArray("woodenfish", "players", "playerid", playerid, "time", TimeNow - (long)((TimeNow - (long)p["time"]!) % Math.Ceiling(cyclespeed)));
-                }
+                // 更新玩家数据
+                Json.ModifyObjectFromArray("woodenfish", "players", "playerid", playerid, "e", e >= 6 ? e : 0);
+                Json.ModifyObjectFromArray("woodenfish", "players", "playerid", playerid, "gongde", e >= 6 ? gongde : (int)Math.Round(Math.Pow(10, e)) + gongde);
+                Json.ModifyObjectFromArray("woodenfish", "players", "playerid", playerid, "time", TimeNow - (long)((TimeNow - (long)p["time"]!) % Math.Ceiling(cyclespeed)));
             }
         }
     }

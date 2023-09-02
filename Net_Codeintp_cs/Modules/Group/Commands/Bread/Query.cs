@@ -41,56 +41,47 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Bread
                     BreadFactory.Produce(receiver.GroupId);
                     int flour = 0, egg = 0, yeast = 0;
                     JObject obj = Json.ReadFile("materials");
-                    foreach (JObject item in ((JArray)obj["groups"]!).Cast<JObject>())
-                    {
-                        if ((string)item["groupid"]! == receiver.GroupId)
-                        {
-                            flour = (int)item["flour"]!;
-                            egg = (int)item["egg"]!;
-                            yeast = (int)item["yeast"]!;
-                            break;
-                        }
-                    }
+                    JObject item = (JObject)obj["groups"]!.Where(x => x.SelectToken("groupid")!.Value<string>()! == receiver.GroupId).FirstOrDefault()!;
+                    flour = (int)item["flour"]!;
+                    egg = (int)item["egg"]!;
+                    yeast = (int)item["yeast"]!;
                     obj = Json.ReadFile("breadfactory");
+                    item = (JObject)obj["groups"]!.Where(x => x.SelectToken("groupid")!.Value<string>()! == receiver.GroupId).FirstOrDefault()!;
                     bool is_maxlevel = false;
                     string mode = "";
                     string expiry;
-                    foreach (JObject item in ((JArray)obj["groups"]!).Cast<JObject>())
+                    if((int)item["factory_level"]! == breadfactory_maxlevel)
+                            {
+                        is_maxlevel = true;
+                    }
+                    switch ((string)item["factory_mode"]!)
                     {
-                        if ((string)item["groupid"]! == receiver.GroupId)
-                        {
-                            if ((int)item["factory_level"]! == breadfactory_maxlevel)
-                            {
-                                is_maxlevel = true;
-                            }
-                            switch ((string)item["factory_mode"]!)
-                            {
-                                case "infinite_diverse":
-                                    mode = "多样化无限供应";
-                                    break;
-                                case "infinite":
-                                    mode = "无限供应";
-                                    break;
-                                case "diverse":
-                                    mode = "多样化供应";
-                                    break;
-                                case "normal":
-                                    mode = "单一化供应";
-                                    break;
-                            }
-                            expiry = (int)item["expiration"]! switch
-                            {
-                                >= 1 => $"{(int)item["expiration"]!} 天",
-                                _ => "永不过期",
-                            };
-                            string properties = @$"
+                        case "infinite_diverse":
+                            mode = "多样化无限供应";
+                            break;
+                        case "infinite":
+                            mode = "无限供应";
+                            break;
+                        case "diverse":
+                            mode = "多样化供应";
+                            break;
+                        case "normal":
+                            mode = "单一化供应";
+                            break;
+                    }
+                    expiry = (int)item["expiration"]! switch
+                    {
+                        >= 1 => $"{(int)item["expiration"]!} 天",
+                        _ => "永不过期",
+                    };
+                    string properties = @$"
 面包厂等级：{(int)item["factory_level"]!} / {breadfactory_maxlevel} 级
 面包厂经验：{(int)item["factory_exp"]!} XP
 今日已获得经验：{(int)item["exp_gained_today"]!} / {(int)(300 * Math.Pow(2, (int)item["factory_level"]! - 1))} XP
 生产（供应）模式：{mode}";
-                            if (is_maxlevel)
-                            {
-                                properties = @$"
+                    if (is_maxlevel)
+                    {
+                        properties = @$"
 面包厂等级： {breadfactory_maxlevel} 级（满级）
 库存升级次数：{(int)item["storage_level"]!} 次
 生产速度升级次数：{(int)item["speed_level"]!} 次
@@ -98,10 +89,10 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Bread
 面包厂经验：{(int)item["factory_exp"]!} XP
 今日已获得经验：{(int)item["exp_gained_today"]!} / {(int)(300 * Math.Pow(2, (int)item["factory_level"]! - 1))} XP
 生产（供应）模式：{mode}";
-                            }
-                            MessageChain messageChain = new MessageChainBuilder()
-                                    .At(receiver.Sender.Id)
-                                    .Plain($@"
+                    }
+                    MessageChain messageChain = new MessageChainBuilder()
+                            .At(receiver.Sender.Id)
+                            .Plain($@"
 本群 ({receiver.GroupId}) 面包厂信息如下：
 -----面包厂属性-----
 {properties.Trim()}
@@ -114,19 +105,16 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Bread
 现有原材料：{flour} 份面粉、{egg} 份鸡蛋、{yeast} 份酵母
 现有面包：{(int)item["breads"]!} / {(int)(64 * Math.Pow(4, (int)item["factory_level"]! - 1)) * Math.Pow(2, (int)item["storage_level"]!)} 块
 ")
-                                    .Build();
-                            try
-                            {
-                                await receiver.QuoteMessageAsync(messageChain);
-                                Logger.Info($"已提供分厂“{receiver.GroupName} ({receiver.GroupId})”的完整信息！");
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("群消息发送失败！");
-                                Logger.Debug($"错误信息：\n{e.Message}");
-                            }
-                            break;
-                        }
+                            .Build();
+                    try
+                    {
+                        await receiver.QuoteMessageAsync(messageChain);
+                        Logger.Info($"已提供分厂“{receiver.GroupName} ({receiver.GroupId})”的完整信息！");
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error("群消息发送失败！");
+                        Logger.Debug($"错误信息：\n{e.Message}");
                     }
                 }
                 else

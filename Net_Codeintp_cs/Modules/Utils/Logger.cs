@@ -21,19 +21,25 @@ namespace Net_Codeintp_cs.Modules.Utils
 {
     internal class Logger
     {
+        // NLog 日志对象
         private static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
         static Logger()
         {
+            // 默认日志等级
             LogLevel defaultLevel = LogLevel.Info;
+            // 如果是debug模式就输出debug信息
             if (BotMain.DebugEnabled)
             {
                 defaultLevel = LogLevel.Debug;
             }
+            // 控制台输出
             ColoredConsoleTarget ConsoleTarget = new()
             {
                 Layout = "${longdate}|${level}|${message:withexception=true}"
             };
+            // 高亮规则
+            // 如果是debug就用灰色，info就用绿色，warning就用黄色，error就用红色
             ConsoleRowHighlightingRule HighlightingDebug = new()
             {
                 Condition = ConditionParser.ParseExpression("level == LogLevel.Debug"),
@@ -54,29 +60,34 @@ namespace Net_Codeintp_cs.Modules.Utils
                 Condition = ConditionParser.ParseExpression("level == LogLevel.Error"),
                 ForegroundColor = ConsoleOutputColor.Red
             };
+            // 添加高亮规则
             ConsoleTarget.RowHighlightingRules.Add(HighlightingDebug);
             ConsoleTarget.RowHighlightingRules.Add(HighlightingInfo);
             ConsoleTarget.RowHighlightingRules.Add(HighlightingWarning);
             ConsoleTarget.RowHighlightingRules.Add(HighlightingError);
+            // 加载配置
             LogManager.Setup().LoadConfiguration(builder =>
             {
                 builder.ForLogger().FilterMinLevel(defaultLevel).WriteTo(ConsoleTarget);
                 builder.ForLogger().FilterMinLevel(defaultLevel).WriteToFile(fileName: "2kbit-log.txt");
             });
         }
-
+        // 输出错误信息
         public static void Error(object error)
         {
             logger.Error(error);
         }
+        // 输出警告信息
         public static void Warning(object warning)
         {
             logger.Warn(warning);
         }
+        // 输出信息
         public static void Info(object info)
         {
             logger.Info(info);
         }
+        // 输出调试信息
         public static void Debug(object debug)
         {
             logger.Debug(debug);

@@ -21,8 +21,9 @@ namespace Net_Codeintp_cs.Modules.Utils
 {
     internal class Json
     {
+        // 获取程序所在目录
         static readonly string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
-
+        // 判断JSON文件是否存在
         public static bool FileExists(string filename)
         {
             if (File.Exists($"{path}\\data\\{filename}.json"))
@@ -31,6 +32,7 @@ namespace Net_Codeintp_cs.Modules.Utils
             }
             return false;
         }
+        // 创建JSON文件
         public static void CreateFile(string filename, JObject objects)
         {
             using StreamWriter file = File.CreateText($"{path}\\data\\{filename}.json");
@@ -40,6 +42,7 @@ namespace Net_Codeintp_cs.Modules.Utils
             writer.Close();
             file.Close();
         }
+        // 读取JSON文件
         public static JObject ReadFile(string filename)
         {
             using StreamReader file = new($"{path}\\data\\{filename}.json");
@@ -49,16 +52,18 @@ namespace Net_Codeintp_cs.Modules.Utils
             file.Close();
             return o;
         }
+        // 判定JSON文件中指定列表是否存在指定对象
         public static bool ObjectExistsInArray(string filename, string location, string property, object value)
         {
             JObject o = ReadFile(filename);
             JArray ar = (JArray)o!.SelectToken(location)!;
-            if (ar.Children().Where(x => x.SelectToken(property)!.Value<string>()! == (string)value).FirstOrDefault()! is not null)
+            if (ar.Children().Where(x => x.SelectToken(property)!.Value<string>()! == (string)value).FirstOrDefault() is not null)
             {
                 return true;
             }
             return false;
         }
+        // 添加对象到列表
         public static void AddObjectToArray(string filename, string location, JObject objects, string? index = null, object? indexvalue = null)
         {
             JObject o = ReadFile(filename);
@@ -92,6 +97,7 @@ namespace Net_Codeintp_cs.Modules.Utils
             ar.Add(objects);
             File.WriteAllText($"{path}\\data\\{filename}.json", o.ToString());
         }
+        // 从列表中删除对象
         public static void DeleteObjectFromArray(string filename, string location, string index, object indexvalue, string? objectindex = null, object? objectindexvalue = null)
         {
             JObject o = ReadFile(filename);
@@ -126,6 +132,7 @@ namespace Net_Codeintp_cs.Modules.Utils
             ar.Remove(ar.Children().Where(x => x.SelectToken(index)!.ToString() == indexvalue.ToString()).FirstOrDefault()!);
             File.WriteAllText($"{path}\\data\\{filename}.json", o.ToString());
         }
+        // 修改列表中对象指定属性的值
         public static void ModifyObjectFromArray(string filename, string location, string index, object indexvalue, string property, object value, string? objectindex = null, object? objectindexvalue = null)
         {
             JObject o = ReadFile(filename);
@@ -160,6 +167,7 @@ namespace Net_Codeintp_cs.Modules.Utils
             obj[property] = JToken.FromObject(value);
             File.WriteAllText($"{path}\\data\\{filename}.json", o.ToString());
         }
+        // 根据指定属性的值，排序列表内的对象
         public static JArray Sort(JArray array, string index, bool desc)
         {
             return desc switch

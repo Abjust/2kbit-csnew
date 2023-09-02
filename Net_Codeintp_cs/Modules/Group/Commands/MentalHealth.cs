@@ -27,6 +27,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
 
         public async void Execute(MessageReceiverBase @base)
         {
+            // 精神疾病列表
             List<string> disorders = new()
                 {
                     "焦虑症",
@@ -43,6 +44,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
                     "孤独症",
                     "多动症"
                 };
+            // 精神疾病的解释
             List<string> explanations = new()
                 {
                     "焦虑症是指在日常情况下，出现强烈、过度和持续的担忧和恐惧，可在几分钟之内达到顶峰。这种症状会干扰日常活动，难以控制。常见的焦虑症有广泛性焦虑障碍、惊恐障碍、社交恐惧症、特定恐惧症和分离焦虑障碍等。",
@@ -59,6 +61,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
                      "孤独症也称自闭症，是广泛性发育障碍中最常见、最具有代表性的疾病。该疾病起病于婴幼儿时期，以社会交往障碍、交流障碍、局限的兴趣、刻板与重复行为方式为主要临床表现，多数患儿还会伴有不同程度的精神发育迟滞。孤独症的患病率报道不一，一般认为约为儿童人口的2～5/万人，男女比例约为3～4：1，男孩是女孩的3-4倍。",
                      "注意缺陷多动障碍，俗称多动症，是一种起病于儿童时期，以与年龄水平不相称的注意缺陷、行为多动和情绪冲动为主要表现的神经发育障碍。ADHD多于学龄前起病，慢性病程，有70%的患儿症状持续到青春期，30%~50%持续到成年期。这些患儿常同时患有学习障碍、对立违抗性障碍、情绪障碍、以及适应障碍等，对其学业、工作、社会及家庭生活等方面产生广泛而消极的负面影响，给家庭和社会造成沉重的负担。"
                 };
+            // 量表列表
             List<string> scales = new()
                 {
                     "MBTI",
@@ -71,6 +74,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
                     "SDS",
                     "SAS"
                 };
+            // 量表链接
             List<string> links = new()
                 {
                     "https://www.jungus.cn/zh-hans/test/",

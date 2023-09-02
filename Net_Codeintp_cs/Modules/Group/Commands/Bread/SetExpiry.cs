@@ -41,15 +41,19 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Bread
                         if (expiry == 0 || ((expiry >= 1) && (expiry <= 30)))
                         {
                             long TimeNow = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+                            // 修改面包厂批次保质期
                             Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", receiver.GroupId, "expiration", expiry);
+                            // 清空面包厂库存
                             Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", receiver.GroupId, "breads", 0);
                             Json.ModifyObjectFromArray("materials", "groups", "groupid", receiver.GroupId, "flour", 0);
                             Json.ModifyObjectFromArray("materials", "groups", "groupid", receiver.GroupId, "egg", 0);
                             Json.ModifyObjectFromArray("materials", "groups", "groupid", receiver.GroupId, "yeast", 0);
+                            // 如果设置的保质期是0，说明是永不过期
                             if (expiry == 0)
                             {
                                 await TrySend.Quote(receiver, "已将面包厂保质期设置为：永不过期\n（本批次库存已自动清空）");
                             }
+                            // 否则就是正常的保质期
                             else
                             {
                                 Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", receiver.GroupId, "last_produce", TimeNow);

@@ -22,12 +22,16 @@ namespace Net_Codeintp_cs.Modules.Group.Tasks
     {
         public static void Execute(string group)
         {
+            // 获取当前时间戳
             long TimeNow = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+            // 读取面包厂数据
             JObject obj = Json.ReadFile("breadfactory");
             JObject g = (JObject)obj["groups"]!.Where(x => x.SelectToken("groupid")!.Value<string>()! == group).FirstOrDefault()!;
             int expiration = (int)g["expiration"]!;
+            // 如果过期时间不为0且当前时间大于过期时间
             if (expiration != 0 && TimeNow >= (long)g["next_expiry"]!)
             {
+                // 重置面包厂数据
                 Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", group, "breads", 0);
                 Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", group, "last_produce", TimeNow);
                 Json.ModifyObjectFromArray("breadfactory", "groups", "groupid", group, "next_expiry", TimeNow + expiration * 86400);

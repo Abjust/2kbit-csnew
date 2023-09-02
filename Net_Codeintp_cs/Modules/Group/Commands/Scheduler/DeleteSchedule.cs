@@ -45,6 +45,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Scheduler
                             JObject obj = Json.ReadFile("schedules");
                             switch (s[1])
                             {
+                                // 根据任务ID查找
                                 case "byid":
                                     if (int.TryParse(s[2], out int tid))
                                     {
@@ -82,6 +83,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Scheduler
                                         await TrySend.Quote(receiver, "任务ID格式有误！");
                                     }
                                     break;
+                                // 根据任务执行时间查找
                                 case "bytime":
                                     if (TimeSpan.TryParseExact($"{s[2]}", "h\\:mm", CultureInfo.CurrentCulture, out TimeSpan timespan))
                                     {
@@ -148,6 +150,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Scheduler
                             await TrySend.Quote(receiver, "参数错误");
                             break;
                     }
+                    // 如果任务ID不为0，说明执行成功，则删除任务
                     if (taskid != 0)
                     {
                         Logger.Info($"已删除定时任务！\n任务ID：{taskid}\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
@@ -155,18 +158,22 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Scheduler
                         await Schedules.Initialize();
                         await TrySend.Quote(receiver, "已删除定时任务！");
                     }
+                    // 如果任务ID为0，说明执行失败，根据失败原因给出提示
                     else if (taskid == 0)
                     {
                         switch (failed)
                         {
+                            // 权限不足
                             case "denied":
                                 Logger.Warning($"未尝试删除定时任务，因为执行者权限不足！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
                                 await TrySend.Quote(receiver, "无法删除定时任务：权限不足");
                                 break;
+                            // 找不到任务
                             case "notfound":
                                 Logger.Warning($"未尝试删除定时任务，因为找不到该任务！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
                                 await TrySend.Quote(receiver, "无法删除定时任务：找不到");
                                 break;
+                            // 参数有误
                             case "generic":
                                 Logger.Warning($"未尝试删除定时任务，因为提供的参数有误！\n执行者：{receiver.Sender.Name} ({receiver.Sender.Id})");
                                 break;

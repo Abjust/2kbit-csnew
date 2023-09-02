@@ -33,7 +33,9 @@ namespace Net_Codeintp_cs.Modules.Friend
             if (receiver.FriendId != BotMain.OwnerQQ)
             {
                 Logger.Info($"接收到私聊消息！\n消息来自：{receiver.FriendName} ({receiver.FriendId})\n消息内容：\n{receiver.MessageChain.MiraiCode}");
+                // 记录上一条消息的来源
                 SendMessage.LastMessageFrom = receiver.FriendId;
+                // 转发给机器人主人
                 try
                 {
                     MessageBase test = new MiraiCodeMessage($"消息来自：{receiver.FriendName} ({receiver.FriendId})\n消息内容：\n{receiver.MessageChain.MiraiCode}\n（你可以使用!send <目标QQ>来发送私聊消息，或者使用!reply回复这条消息）");

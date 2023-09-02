@@ -36,12 +36,13 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                 {
                     JObject obj = Json.ReadFile("woodenfish");
                     JObject item = (JObject)obj["players"]!.Where(x => x.SelectToken("playerid")!.Value<string>()! == receiver.Sender.Id).FirstOrDefault()!;
-                    if ((int)item["ban"]! == 0 && Math.Pow(10, (int)item["gongde"]!) >= 100)
+                    int laugh = 100;
+                    if ((int)item["ban"]! == 0 && Math.Pow(10, (int)item["gongde"]!) >= laugh)
                     {
-                        await TrySend.Quote(receiver, "哈*100"); ;
-                        Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "gongde", (int)item["gongde"]! - 100);
+                        await TrySend.Quote(receiver, $"哈*{laugh}"); ;
+                        Json.ModifyObjectFromArray("woodenfish", "players", "playerid", receiver.Sender.Id, "gongde", (int)item["gongde"]! - laugh);
                     }
-                    else if ((int)item["ban"]! == 0 && Math.Pow(10, (double)item["e"]!) < 100)
+                    else if ((int)item["ban"]! == 0 && Math.Pow(10, (double)item["e"]!) < laugh)
                     {
                         await TrySend.Quote(receiver, "宁踏马功德不够，笑个毛啊（恼");
                     }

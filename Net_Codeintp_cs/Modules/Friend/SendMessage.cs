@@ -36,13 +36,17 @@ namespace Net_Codeintp_cs.Modules.Friend
         public async void Execute(MessageReceiverBase @base)
         {
             FriendMessageReceiver receiver = @base.Concretize<FriendMessageReceiver>();
+            // 如果正在等待输入，并且发送者是机器人的主人，就执行发送
             if (Waiting && receiver.Sender.Id == BotMain.OwnerQQ)
             {
                 long TimeNow = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+
+                // 如果发送的是“!cancel”或者超时了，就取消发送
                 if (receiver.MessageChain.GetPlainMessage() == "!cancel" || TimeNow >= WaitUntil)
                 {
                     await MessageManager.SendFriendMessageAsync(BotMain.OwnerQQ, "发送已取消！");
                 }
+                // 否则就发送
                 else
                 {
                     try
@@ -63,6 +67,7 @@ namespace Net_Codeintp_cs.Modules.Friend
             {
                 string code = receiver.MessageChain.MiraiCode;
                 string[] s = code.Split(" ");
+                // 如果参数数量正确，就开始等待输入
                 if (s.Length == 2)
                 {
                     await MessageManager.SendFriendMessageAsync(BotMain.OwnerQQ, "请输入要发送的内容！（若要取消发送，请在聊天框中输入!cancel）");
@@ -75,8 +80,10 @@ namespace Net_Codeintp_cs.Modules.Friend
                     await receiver.SendMessageAsync("缺少参数");
                 }
             }
+            // 如果发送的是“!reply”，就开始等待输入，且将上一条消息的来源作为目标
             else if (receiver.FriendId == BotMain.OwnerQQ && receiver.MessageChain.GetPlainMessage() == "!reply")
             {
+                // 如果上一条消息的来源不为空，就开始等待输入
                 if (LastMessageFrom is not null)
                 {
                     await MessageManager.SendFriendMessageAsync(BotMain.OwnerQQ, "请输入要回复的内容！（若要取消发送，请在聊天框中输入!cancel）");
@@ -84,6 +91,7 @@ namespace Net_Codeintp_cs.Modules.Friend
                     Waiting = true;
                     WaitUntil = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds() + 45;
                 }
+                // 否则就提示没有找到上一条消息的来源
                 else
                 {
                     await MessageManager.SendFriendMessageAsync(BotMain.OwnerQQ, "没有找到上一条消息的来源");

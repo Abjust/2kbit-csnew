@@ -44,6 +44,8 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                         {
                             int needed_e = 0;
                             int upgrades = 0;
+                            // 升级所需功德（e值）公式
+                            int formula = (int)item["level"]! + 1;
                             switch (s.Length)
                             {
                                 case 2:
@@ -54,7 +56,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                                         {
                                             for (int i = 0; i < number; i++)
                                             {
-                                                needed_e += (int)item["level"]! + i - 1 + 2;
+                                                needed_e += formula + i;
                                             }
                                         }
                                         else
@@ -68,7 +70,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Woodenfish
                                     }
                                     break;
                                 case 1:
-                                    needed_e = (int)item["level"]! + 1;
+                                    needed_e = formula;
                                     upgrades = 1;
                                     if (Math.Pow(10, (double)item["ee"]!) + (double)item["e"]! >= needed_e)
                                     {
