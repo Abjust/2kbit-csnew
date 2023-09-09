@@ -15,14 +15,13 @@
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Reflection;
 
 namespace Net_Codeintp_cs.Modules.Utils
 {
     internal class Json
     {
         // 获取程序所在目录
-        static readonly string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+        static readonly string path = AppDomain.CurrentDomain.BaseDirectory;
         // 判断JSON文件是否存在
         public static bool FileExists(string filename)
         {

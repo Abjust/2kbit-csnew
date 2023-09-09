@@ -56,7 +56,7 @@ namespace Net_Codeintp_cs.Modules.Group.Commands
                 Random r = new();
                 // 随机选择一条标语
                 int random = r.Next(splashes.Count);
-                await TrySend.Quote(receiver, $"\n机器人版本：2kbit C# Edition: New b1.3.1\n上次更新日期：2023/8/31\n更新内容：啥也没更新（？）\n---------\n{splashes[random]}");
+                await TrySend.Quote(receiver, $"\n机器人版本：2kbit C# Edition: New b1.3.2\n上次更新日期：2023/8/31\n更新内容：修复bug\n---------\n{splashes[random]}");
             }
         }
     }

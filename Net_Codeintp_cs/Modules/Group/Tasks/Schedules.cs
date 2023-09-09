@@ -134,11 +134,14 @@ namespace Net_Codeintp_cs.Modules.Group.Tasks
         }
         public static async Task Initialize()
         {
-            StdSchedulerFactory factory = new();
-            IScheduler scheduler = await factory.GetScheduler();
-            CancellationToken ct = new();
-            await DoSomething(scheduler, ct);
-            Initialized = true;
+            if (Json.FileExists("schedules"))
+            {
+                StdSchedulerFactory factory = new();
+                IScheduler scheduler = await factory.GetScheduler();
+                CancellationToken ct = new();
+                await DoSomething(scheduler, ct);
+                Initialized = true;
+            }
         }
     }
 }

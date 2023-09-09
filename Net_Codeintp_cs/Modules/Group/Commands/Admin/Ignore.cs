@@ -40,6 +40,14 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Admin
                             switch (Permission.IsIgnored(receiver.GroupId, Identify.Do(s[1])))
                             {
                                 case false:
+                                    if (!Json.ObjectExistsInArray("ignores", "groups", "groupid", receiver.GroupId))
+                                    {
+                                        JObject obj = new(
+                                        new JProperty("groupid", receiver.GroupId),
+                                        new JProperty("list",
+                                            new JArray()));
+                                        Json.AddObjectToArray("ignores", "groups", obj);
+                                    }
                                     JObject o = new(
                                     new JProperty("qq", Identify.Do(s[1])));
                                     Json.AddObjectToArray("ignores", "groups.list", o, "groupid", receiver.GroupId);

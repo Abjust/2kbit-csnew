@@ -50,8 +50,8 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Bread
                     bool is_maxlevel = false;
                     string mode = "";
                     string expiry;
-                    if((int)item["factory_level"]! == breadfactory_maxlevel)
-                            {
+                    if ((int)item["factory_level"]! == breadfactory_maxlevel)
+                    {
                         is_maxlevel = true;
                     }
                     switch ((string)item["factory_mode"]!)

@@ -44,6 +44,14 @@ namespace Net_Codeintp_cs.Modules.Group.Commands.Admin
                                     switch (Permission.IsBlocked(receiver.GroupId, Identify.Do(s[1])))
                                     {
                                         case false:
+                                            if (!Json.ObjectExistsInArray("blocklist", "groups", "groupid", receiver.GroupId))
+                                            {
+                                                JObject obj = new(
+                                                new JProperty("groupid", receiver.GroupId),
+                                                new JProperty("list",
+                                                    new JArray()));
+                                                Json.AddObjectToArray("blocklist", "groups", obj);
+                                            }
                                             JObject o = new(
                                             new JProperty("qq", Identify.Do(s[1])));
                                             Json.AddObjectToArray("blocklist", "groups.list", o, "groupid", receiver.GroupId);
